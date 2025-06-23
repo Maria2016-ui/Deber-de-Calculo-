@@ -116,7 +116,7 @@
   <div class="side-text right">Math</div>
 
   <div class="container">
-    <h1>MathMabe 🧮</h1>
+    <h1>MathMabe🧮</h1>
     <p>Resuelve paso a paso tus ecuaciones e inecuaciones desde lo más simple hasta lo más complejo.</p>
 
     <textarea id="inputEquation" placeholder="Ejemplo: 2x + 3 = 7 o x^2 - 5x + 6 > 0"></textarea>
@@ -160,6 +160,7 @@
       }
 
       plotFunction(input);
+      calculateDomainAndRange(input);
     }
 
     function solveLinearEquation(eq, div) {
@@ -223,14 +224,4 @@
       if (discriminant >= 0) {
         const root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
         const root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
-        div.innerHTML += `<p>Raíces reales: x₁ = ${root1.toFixed(2)}, x₂ = ${root2.toFixed(2)}</p>`;
-      } else {
-        div.innerHTML += `<p>No hay raíces reales (discriminante negativo).</p>`;
-      }
-    }
-
-    function solveLinearInequality(eq, div) {
-      div.innerHTML += `<p>Proceso básico:</p>`;
-      div.innerHTML += `<ul>
-        <li>Paso 1: Reordenar término con x</li>
-        <li>Paso 2: Despejar x manteniendo el signo de desigualdad</
+        div.innerHTML += `<p>Raíces re
