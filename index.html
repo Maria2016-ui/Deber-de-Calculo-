@@ -1,227 +1,82 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MathMabe 🧮</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <title>Derivada por forma cuadrática</title>
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
     body {
-      margin: 0;
-      background: linear-gradient(to right, #e6f7ff, #f9f9f9);
-      color: #333;
-      position: relative;
-      overflow-x: hidden;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f0f0;
     }
-
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 40px 20px;
-      text-align: center;
-      z-index: 2;
-      position: relative;
-    }
-
-    h1 {
-      font-size: 3em;
-      color: #00796b;
-      margin-bottom: 10px;
-    }
-
-    h2 {
-      color: #004d40;
-    }
-
-    .math-tag {
-      font-size: 2.5em;
-      color: rgba(0, 0, 0, 0.1);
-      font-weight: bold;
-      user-select: none;
-      pointer-events: none;
-      display: block;
-      text-align: center;
-      margin: 20px 0;
-    }
-
-    textarea {
-      width: 100%;
-      height: 60px;
-      padding: 10px;
-      margin-top: 20px;
+    input, button {
       font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      padding: 5px;
+      margin: 5px;
     }
-
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #00796b;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #004d40;
-    }
-
-    #steps {
+    .resultado {
       margin-top: 20px;
-      text-align: left;
-      background: #fff;
-      border: 1px solid #ddd;
       padding: 15px;
+      background: #fff;
       border-radius: 8px;
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    canvas {
-      margin-top: 30px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-
-    .side-text {
-      position: fixed;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 3em;
-      color: rgba(0, 0, 0, 0.1);
-      font-weight: bold;
-      user-select: none;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .left { left: 10px; }
-    .right { right: 10px; }
-
-    @media (max-width: 600px) {
-      .side-text { display: none; }
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
-  <div class="side-text left">Math</div>
-  <div class="side-text right">Math</div>
 
-  <div class="container">
-    <h1>MathMabe🧮</h1>
-    <p>Resuelve paso a paso tus ecuaciones e inecuaciones desde lo más simple hasta lo más complejo.</p>
+<h2>Derivada usando forma cuadrática:</h2>
+<p><strong>f'(x) = lim(Δx → 0) [(f(x + Δx))² - (f(x))²] / Δx</strong></p>
+<p>Ingresa <code>f(x)</code> como una función simple tipo <code>x</code>, <code>2x</code>, <code>x^2</code>, etc.</p>
 
-    <textarea id="inputEquation" placeholder="Ejemplo: 2x + 3 = 7 o x^2 - 5x + 6 > 0"></textarea>
-    <button onclick="solve()">Resolver</button>
+<input id="fx" placeholder="Ejemplo: x^2">
+<button onclick="derivar()">Derivar</button>
 
-    <div id="steps"></div>
-    <canvas id="graphCanvas" width="600" height="400"></canvas>
-  </div>
+<div class="resultado" id="salida"></div>
 
-  <div class="math-tag">Math</div>
-  <div class="math-tag">Math</div>
-  <div class="math-tag">Math</div>
-  <div class="math-tag">Math</div>
-  <div class="math-tag">Math</div>
+<script>
+  function derivar() {
+    const entrada = document.getElementById("fx").value;
+    const salida = document.getElementById("salida");
+    salida.innerHTML = "";
 
-  <script>
-    function solve() {
-      const input = document.getElementById("inputEquation").value.trim().toLowerCase();
-      const stepsDiv = document.getElementById("steps");
+    const h = "Δx";
 
-      stepsDiv.innerHTML = "";
-
-      if (!input) {
-        stepsDiv.innerHTML = "<p>Por favor ingresa una ecuación o inecuación.</p>";
-        return;
-      }
-
-      let type = "lineal";
-      if (input.includes("^2")) type = "cuadrática";
-
-      if (input.includes("=")) {
-        stepsDiv.innerHTML += `<h2>Ecuación ${type}</h2>`;
-        if (type === "lineal") solveLinearEquation(input, stepsDiv);
-        else if (type === "cuadrática") solveQuadraticEquation(input, stepsDiv);
-      } else if (input.includes(">") || input.includes("<")) {
-        stepsDiv.innerHTML += `<h2>Inecuación ${type}</h2>`;
-        if (type === "lineal") solveLinearInequality(input, stepsDiv);
-        else if (type === "cuadrática") solveQuadraticInequality(input, stepsDiv);
-      } else {
-        stepsDiv.innerHTML = "<p>Sintaxis no reconocida. Usa '=' o '>' o '<'.</p>";
-      }
-
-      plotFunction(input);
-      calculateDomainAndRange(input);
+    function evaluarFx(expr, sustituirPor) {
+      let reemplazada = expr.replace(/x/g, "(" + sustituirPor + ")");
+      return `(${reemplazada})`;
     }
 
-    function solveLinearEquation(eq, div) {
-      try {
-        const parts = eq.split("=").map(part => part.trim());
-        const left = parts[0];
-        const right = parts[1];
-
-        const [a1, b1] = parseLinear(left);
-        const [a2, b2] = parseLinear(right);
-
-        const a = a1 - a2;
-        const b = b1 - b2;
-
-        const x = -b / a;
-
-        div.innerHTML += `
-          <ul>
-            <li>Paso 1: Pasamos todo al lado izquierdo → ${left} - (${right}) = 0</li>
-            <li>Paso 2: Simplificamos → ${a.toFixed(2)}x + ${b.toFixed(2)} = 0</li>
-            <li>Paso 3: Despejamos x → x = ${x.toFixed(2)}</li>
-          </ul>
-        `;
-      } catch (e) {
-        div.innerHTML += `<p>Error: ${e.message}</p>`;
-      }
+    function expandirCuadrado(expr) {
+      return `(${expr})² = (${expr})*(${expr})`;
     }
 
-    function parseLinear(expr) {
-      expr = expr.replace(/\s+/g, "");
-      let a = 0, b = 0;
+    let pasos = [];
 
-      const xTerms = expr.match(/([-+]?\d*)x/g) || [];
-      xTerms.forEach(term => {
-        let num = term.replace("x", "") || "1";
-        a += parseFloat(num);
-      });
+    pasos.push(`<strong>f(x) =</strong> ${entrada}`);
 
-      const constants = expr.match(/([-+]?\d+(?![\dx]))/g) || [];
-      constants.forEach(term => {
-        b += parseFloat(term);
-      });
+    let fx = evaluarFx(entrada, "x");
+    let fxh = evaluarFx(entrada, `x + ${h}`);
 
-      return [a, b];
-    }
+    pasos.push(`<strong>1)</strong> f(x) = ${fx}`);
+    pasos.push(`<strong>2)</strong> f(x + Δx) = ${fxh}`);
 
-    function solveQuadraticEquation(eq, div) {
-      const aMatch = eq.match(/([+-]?\d*)x\^2/);
-      const bMatch = eq.match(/([+-]?\d+)x(?![\^])/);
-      const cMatch = eq.match(/([+-]?\d+)(?![x])/g);
+    pasos.push(`<strong>3)</strong> Sustituimos en la fórmula:`);
+    pasos.push(`[(f(x + Δx))² - (f(x))²] / Δx`);
+    pasos.push(`=[(${fxh})² - (${fx})²] / Δx`);
 
-      const a = parseFloat(aMatch ? aMatch[1] || "1" : "1");
-      const b = parseFloat(bMatch ? bMatch[1] : "0");
-      const c = parseFloat(cMatch ? cMatch[cMatch.length - 1] : "0");
+    pasos.push(`<strong>4)</strong> Usamos identidad: (a² - b²) = (a - b)(a + b)`);
+    pasos.push(`= [(${fxh}) - (${fx})] * [(${fxh}) + (${fx})] / Δx`);
 
-      const discriminant = b * b - 4 * a * c;
+    pasos.push(`<strong>5)</strong> Aplicamos límite Δx → 0`);
+    pasos.push(`El término [(${fxh}) - (${fx})] / Δx → f'(x)`);
+    pasos.push(`El término [(${fxh}) + (${fx})] → 2f(x)`);
 
-      div.innerHTML += `<p>Coeficientes: a=${a}, b=${b}, c=${c}</p>`;
-      div.innerHTML += `<p>Discriminante: D = b² - 4ac = ${discriminant}</p>`;
+    pasos.push(`<strong>Resultado:</strong> f'(x^2) = 2f(x) * f'(x)`);
 
-      if (discriminant >= 0) {
-        const root1 = (-b + Math.sqrt(discriminant)) / (2 * a);
-        const root2 = (-b - Math.sqrt(discriminant)) / (2 * a);
-        div.innerHTML += `<p>Raíces re
+    salida.innerHTML = pasos.map(p => "<p>" + p + "</p>").join("");
+  }
+</script>
+
+</body>
+</html>
