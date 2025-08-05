@@ -1,81 +1,147 @@
-<!DOCTYPE html>
+
+  <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Derivada por forma cuadrática</title>
+  <title>Derivación Cuadrática Paso a Paso</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f0f0f0;
+      background: #f9f9f9;
     }
     input, button {
       font-size: 16px;
-      padding: 5px;
+      padding: 6px;
       margin: 5px;
     }
     .resultado {
       margin-top: 20px;
       padding: 15px;
-      background: #fff;
-      border-radius: 8px;
+      background: white;
+      border-radius: 10px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin-top: 15px;
+    }
+    code {
+      background: #eee;
+      padding: 2px 4px;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
 
-<h2>Derivada usando forma cuadrática:</h2>
-<p><strong>f'(x) = lim(Δx → 0) [(f(x + Δx))² - (f(x))²] / Δx</strong></p>
-<p>Ingresa <code>f(x)</code> como una función simple tipo <code>x</code>, <code>2x</code>, <code>x^2</code>, etc.</p>
+<h2>Derivada con fórmula cuadrática</h2>
+<p>Usamos esta fórmula para derivar paso a paso:</p>
+<pre><code>f'(x) = lim(Δx → 0) [(f(x + Δx))² - (f(x))²] / Δx</code></pre>
 
-<input id="fx" placeholder="Ejemplo: x^2">
-<button onclick="derivar()">Derivar</button>
+<p>Ingresa una función tipo: <code>x</code>, <code>2x</code>, <code>x^2</code>, etc.</p>
+<input id="funcion" placeholder="Ejemplo: x^2">
+<button onclick="resolver()">Derivar paso a paso</button>
 
-<div class="resultado" id="salida"></div>
+<div class="resultado" id="pasos"></div>
+<canvas id="grafico" width="500" height="300"></canvas>
 
 <script>
-  function derivar() {
-    const entrada = document.getElementById("fx").value;
-    const salida = document.getElementById("salida");
-    salida.innerHTML = "";
-
-    const h = "Δx";
-
-    function evaluarFx(expr, sustituirPor) {
-      let reemplazada = expr.replace(/x/g, "(" + sustituirPor + ")");
-      return `(${reemplazada})`;
-    }
-
-    function expandirCuadrado(expr) {
-      return `(${expr})² = (${expr})*(${expr})`;
-    }
-
-    let pasos = [];
-
-    pasos.push(`<strong>f(x) =</strong> ${entrada}`);
-
-    let fx = evaluarFx(entrada, "x");
-    let fxh = evaluarFx(entrada, `x + ${h}`);
-
-    pasos.push(`<strong>1)</strong> f(x) = ${fx}`);
-    pasos.push(`<strong>2)</strong> f(x + Δx) = ${fxh}`);
-
-    pasos.push(`<strong>3)</strong> Sustituimos en la fórmula:`);
-    pasos.push(`[(f(x + Δx))² - (f(x))²] / Δx`);
-    pasos.push(`=[(${fxh})² - (${fx})²] / Δx`);
-
-    pasos.push(`<strong>4)</strong> Usamos identidad: (a² - b²) = (a - b)(a + b)`);
-    pasos.push(`= [(${fxh}) - (${fx})] * [(${fxh}) + (${fx})] / Δx`);
-
-    pasos.push(`<strong>5)</strong> Aplicamos límite Δx → 0`);
-    pasos.push(`El término [(${fxh}) - (${fx})] / Δx → f'(x)`);
-    pasos.push(`El término [(${fxh}) + (${fx})] → 2f(x)`);
-
-    pasos.push(`<strong>Resultado:</strong> f'(x^2) = 2f(x) * f'(x)`);
-
-    salida.innerHTML = pasos.map(p => "<p>" + p + "</p>").join("");
+function parsearFuncion(fx, x) {
+  if (fx.includes("^")) {
+    const [coef, exp] = fx.split("x^");
+    const c = coef === "" ? 1 : parseFloat(coef);
+    const e = parseInt(exp);
+    return c * Math.pow(x, e);
+  } else if (fx.includes("x")) {
+    const c = fx.replace("x", "") || "1";
+    return parseFloat(c) * x;
+  } else {
+    return parseFloat(fx);
   }
+}
+
+function expandirYDerivar(fx) {
+  const pasos = [];
+  const dx = 0.00001; // delta x muy pequeño
+  const x = 2; // valor de prueba
+  const fx_val = parsearFuncion(fx, x);
+  const fx_dx_val = parsearFuncion(fx, x + dx);
+
+  const fx2 = fx_val * fx_val;
+  const fx_dx2 = fx_dx_val * fx_dx_val;
+
+  const numerador = fx_dx2 - fx2;
+  const derivada_aprox = numerador / dx;
+
+  pasos.push(`<strong>1)</strong> Sea f(x) = ${fx}`);
+  pasos.push(`<strong>2)</strong> Evaluamos f(x) en x = 2 ⇒ f(2) = ${fx_val}`);
+  pasos.push(`<strong>3)</strong> f(2 + Δx) = f(2.00001) = ${fx_dx_val.toFixed(5)}`);
+  pasos.push(`<strong>4)</strong> Aplicamos la fórmula:`);
+  pasos.push(`f'(x) ≈ [(f(2 + Δx))² - (f(2))²] / Δx`);
+  pasos.push(`f'(2) ≈ [${fx_dx2.toFixed(5)} - ${fx2.toFixed(5)}] / ${dx}`);
+  pasos.push(`f'(2) ≈ ${numerador.toFixed(5)} / ${dx} = <strong>${derivada_aprox.toFixed(3)}</strong>`);
+  pasos.push(`<em>Esto es la derivada de f(x)^2 evaluada en x = 2</em>`);
+
+  return { pasos, x, fx_val, derivada_aprox };
+}
+
+function graficar(fx) {
+  const canvas = document.getElementById("grafico");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Sistema coordenado
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  ctx.strokeStyle = "#000";
+  ctx.beginPath();
+  ctx.moveTo(0, cy); ctx.lineTo(canvas.width, cy); // eje x
+  ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height); // eje y
+  ctx.stroke();
+
+  // Dibuja f(x)
+  ctx.beginPath();
+  ctx.strokeStyle = "blue";
+  for (let i = -100; i <= 100; i++) {
+    const x = i / 10;
+    const y = parsearFuncion(fx, x);
+    const px = cx + x * 20;
+    const py = cy - y * 10;
+    if (i === -100) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+  ctx.fillStyle = "blue";
+  ctx.fillText("f(x)", 50, 20);
+
+  // Punto de evaluación x=2
+  const x_eval = 2;
+  const y_eval = parsearFuncion(fx, x_eval);
+  const px = cx + x_eval * 20;
+  const py = cy - y_eval * 10;
+  ctx.beginPath();
+  ctx.arc(px, py, 4, 0, 2 * Math.PI);
+  ctx.fillStyle = "red";
+  ctx.fill();
+  ctx.fillText(`f(${x_eval})`, px + 5, py - 5);
+}
+
+function resolver() {
+  const fx = document.getElementById("funcion").value.trim();
+  const contenedor = document.getElementById("pasos");
+
+  if (!fx) {
+    contenedor.innerHTML = "Por favor ingresa una función.";
+    return;
+  }
+
+  const { pasos, x, fx_val, derivada_aprox } = expandirYDerivar(fx);
+
+  contenedor.innerHTML = pasos.map(p => `<p>${p}</p>`).join("");
+
+  graficar(fx);
+}
 </script>
 
 </body>
