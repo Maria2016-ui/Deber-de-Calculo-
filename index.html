@@ -2,147 +2,95 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Derivación Cuadrática Paso a Paso</title>
+  <title>Derivación Numérica Paso a Paso</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f9f9f9;
-    }
-    input, button {
-      font-size: 16px;
-      padding: 6px;
-      margin: 5px;
-    }
-    .resultado {
-      margin-top: 20px;
-      padding: 15px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-    canvas {
-      border: 1px solid #ccc;
-      margin-top: 15px;
-    }
-    code {
-      background: #eee;
-      padding: 2px 4px;
-      border-radius: 4px;
-    }
+    body { font-family: Arial; text-align: center; }
+    canvas { border: 1px solid black; margin-top: 10px; }
+    .pasos { text-align: left; width: 500px; margin: auto; background: #f3f3f3; padding: 10px; border-radius: 8px; }
   </style>
 </head>
 <body>
+  <h2>Derivada usando definición cuadrática</h2>
+  <p>Función: f(x) = x² + 2x + 1</p>
+  <p>Usamos: f'(x) = lim<sub>Δx→0</sub> [(f(x + Δx) - f(x)) / Δx]</p>
+  <div class="pasos" id="pasos"></div>
+  <canvas id="grafica" width="600" height="400"></canvas>
 
-<h2>Derivada con fórmula cuadrática</h2>
-<p>Usamos esta fórmula para derivar paso a paso:</p>
-<pre><code>f'(x) = lim(Δx → 0) [(f(x + Δx))² - (f(x))²] / Δx</code></pre>
+  <script>
+    // Función cuadrática
+    function f(x) {
+      return x*x + 2*x + 1;
+    }
 
-<p>Ingresa una función tipo: <code>x</code>, <code>2x</code>, <code>x^2</code>, etc.</p>
-<input id="funcion" placeholder="Ejemplo: x^2">
-<button onclick="resolver()">Derivar paso a paso</button>
+    // Derivada numérica con pasos
+    const x0 = 1;
+    const dx = 0.001;
+    const fx0 = f(x0);
+    const fx0dx = f(x0 + dx);
+    const diferencia = fx0dx - fx0;
+    const derivada = diferencia / dx;
 
-<div class="resultado" id="pasos"></div>
-<canvas id="grafico" width="500" height="300"></canvas>
+    // Mostrar pasos
+    document.getElementById("pasos").innerHTML = `
+      <b>Pasos para calcular f'(x) en x = ${x0}</b><br><br>
+      1. f(x) = x² + 2x + 1<br>
+      2. x = ${x0}, Δx = ${dx}<br>
+      3. f(${x0}) = ${fx0.toFixed(6)}<br>
+      4. f(${x0} + ${dx}) = f(${(x0 + dx).toFixed(6)}) = ${fx0dx.toFixed(6)}<br>
+      5. Diferencia: f(x+Δx) - f(x) = ${fx0dx.toFixed(6)} - ${fx0.toFixed(6)} = ${diferencia.toFixed(6)}<br>
+      6. Derivada aproximada: ${diferencia.toFixed(6)} / ${dx} = <b>${derivada.toFixed(6)}</b><br>
+    `;
 
-<script>
-function parsearFuncion(fx, x) {
-  if (fx.includes("^")) {
-    const [coef, exp] = fx.split("x^");
-    const c = coef === "" ? 1 : parseFloat(coef);
-    const e = parseInt(exp);
-    return c * Math.pow(x, e);
-  } else if (fx.includes("x")) {
-    const c = fx.replace("x", "") || "1";
-    return parseFloat(c) * x;
-  } else {
-    return parseFloat(fx);
-  }
-}
+    // Graficar
+    const canvas = document.getElementById("grafica");
+    const ctx = canvas.getContext("2d");
 
-function expandirYDerivar(fx) {
-  const pasos = [];
-  const dx = 0.00001; // delta x muy pequeño
-  const x = 2; // valor de prueba
-  const fx_val = parsearFuncion(fx, x);
-  const fx_dx_val = parsearFuncion(fx, x + dx);
+    // Escalas
+    const toCanvasX = x => 300 + x * 80;
+    const toCanvasY = y => 200 - y * 20;
 
-  const fx2 = fx_val * fx_val;
-  const fx_dx2 = fx_dx_val * fx_dx_val;
+    // Dibujar ejes
+    ctx.beginPath();
+    ctx.moveTo(0, toCanvasY(0));
+    ctx.lineTo(600, toCanvasY(0));
+    ctx.moveTo(toCanvasX(0), 0);
+    ctx.lineTo(toCanvasX(0), 400);
+    ctx.strokeStyle = "#000";
+    ctx.stroke();
 
-  const numerador = fx_dx2 - fx2;
-  const derivada_aprox = numerador / dx;
+    // Dibujar función
+    ctx.beginPath();
+    for (let x = -3; x <= 3; x += 0.01) {
+      const cx = toCanvasX(x);
+      const cy = toCanvasY(f(x));
+      if (x === -3) ctx.moveTo(cx, cy);
+      else ctx.lineTo(cx, cy);
+    }
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
+    ctx.stroke();
 
-  pasos.push(`<strong>1)</strong> Sea f(x) = ${fx}`);
-  pasos.push(`<strong>2)</strong> Evaluamos f(x) en x = 2 ⇒ f(2) = ${fx_val}`);
-  pasos.push(`<strong>3)</strong> f(2 + Δx) = f(2.00001) = ${fx_dx_val.toFixed(5)}`);
-  pasos.push(`<strong>4)</strong> Aplicamos la fórmula:`);
-  pasos.push(`f'(x) ≈ [(f(2 + Δx))² - (f(2))²] / Δx`);
-  pasos.push(`f'(2) ≈ [${fx_dx2.toFixed(5)} - ${fx2.toFixed(5)}] / ${dx}`);
-  pasos.push(`f'(2) ≈ ${numerador.toFixed(5)} / ${dx} = <strong>${derivada_aprox.toFixed(3)}</strong>`);
-  pasos.push(`<em>Esto es la derivada de f(x)^2 evaluada en x = 2</em>`);
+    // Dibujar punto (x0, f(x0))
+    ctx.beginPath();
+    ctx.arc(toCanvasX(x0), toCanvasY(fx0), 5, 0, 2 * Math.PI);
+    ctx.fillStyle = "red";
+    ctx.fill();
 
-  return { pasos, x, fx_val, derivada_aprox };
-}
-
-function graficar(fx) {
-  const canvas = document.getElementById("grafico");
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Sistema coordenado
-  const cx = canvas.width / 2;
-  const cy = canvas.height / 2;
-  ctx.strokeStyle = "#000";
-  ctx.beginPath();
-  ctx.moveTo(0, cy); ctx.lineTo(canvas.width, cy); // eje x
-  ctx.moveTo(cx, 0); ctx.lineTo(cx, canvas.height); // eje y
-  ctx.stroke();
-
-  // Dibuja f(x)
-  ctx.beginPath();
-  ctx.strokeStyle = "blue";
-  for (let i = -100; i <= 100; i++) {
-    const x = i / 10;
-    const y = parsearFuncion(fx, x);
-    const px = cx + x * 20;
-    const py = cy - y * 10;
-    if (i === -100) ctx.moveTo(px, py);
-    else ctx.lineTo(px, py);
-  }
-  ctx.stroke();
-  ctx.fillStyle = "blue";
-  ctx.fillText("f(x)", 50, 20);
-
-  // Punto de evaluación x=2
-  const x_eval = 2;
-  const y_eval = parsearFuncion(fx, x_eval);
-  const px = cx + x_eval * 20;
-  const py = cy - y_eval * 10;
-  ctx.beginPath();
-  ctx.arc(px, py, 4, 0, 2 * Math.PI);
-  ctx.fillStyle = "red";
-  ctx.fill();
-  ctx.fillText(`f(${x_eval})`, px + 5, py - 5);
-}
-
-function resolver() {
-  const fx = document.getElementById("funcion").value.trim();
-  const contenedor = document.getElementById("pasos");
-
-  if (!fx) {
-    contenedor.innerHTML = "Por favor ingresa una función.";
-    return;
-  }
-
-  const { pasos, x, fx_val, derivada_aprox } = expandirYDerivar(fx);
-
-  contenedor.innerHTML = pasos.map(p => `<p>${p}</p>`).join("");
-
-  graficar(fx);
-}
-</script>
-
+    // Dibujar recta tangente
+    ctx.beginPath();
+    for (let x = x0 - 2; x <= x0 + 2; x += 0.01) {
+      const y = derivada * (x - x0) + fx0;
+      const cx = toCanvasX(x);
+      const cy = toCanvasY(y);
+      if (x === x0 - 2) ctx.moveTo(cx, cy);
+      else ctx.lineTo(cx, cy);
+    }
+    ctx.strokeStyle = "green";
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 5]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  </script>
 </body>
 </html>
 
