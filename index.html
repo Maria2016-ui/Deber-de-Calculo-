@@ -2,115 +2,131 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Derivadas Paso a Paso</title>
+  <title>Resolución de Ecuaciones e Inecuaciones</title>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      background-color: #f3f3f3;
-    }
-    h1 {
-      color: #333;
-    }
-    input, button {
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 10px;
-    }
-    #result {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: white;
-      border-left: 5px solid #4CAF50;
-    }
-    .paso {
-      margin-bottom: 10px;
-    }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .output { margin-top: 20px; }
+    canvas { max-width: 600px; }
   </style>
 </head>
 <body>
+  <h2>Resolver ecuaciones e inecuaciones cuadráticas</h2>
+  <p>Escribe una ecuación como <strong>x^2 - 3x + 2 = 0</strong> o una inecuación como <strong>x^2 - 3x + 2 > 0</strong></p>
 
-  <h1>Derivadas Paso a Paso (Versión Básica)</h1>
+  <input type="text" id="input" placeholder="Ej: x^2 - 3x + 2 > 0" style="width: 400px;">
+  <button onclick="resolver()">Resolver</button>
 
-  <label for="funcion">Ingresa tu función (ejemplo: 3x^2 + 2x + 5):</label><br>
-  <input type="text" id="funcion" placeholder="Ej: 5x^3 + 2x^2 - 3x + 7" size="40"><br>
-  <button onclick="derivar()">Derivar paso a paso</button>
-
-  <div id="result"></div>
+  <div class="output" id="resultado"></div>
+  <div class="output" id="tabla"></div>
+  <canvas id="grafico"></canvas>
 
   <script>
-    function derivar() {
-      const input = document.getElementById("funcion").value;
-      const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = "";
+    function resolver() {
+      const entrada = document.getElementById("input").value;
+      const resultadoDiv = document.getElementById("resultado");
+      const tablaDiv = document.getElementById("tabla");
+      const graficoCanvas = document.getElementById("grafico");
+      resultadoDiv.innerHTML = "";
+      tablaDiv.innerHTML = "";
+      const regex = /([+-]?\d*)x\^2\s*([+-]\s*\d*)x\s*([+-]\s*\d*)([<>=]+)\s*0|=\s*0/;
+      const match = entrada.replace(/\s+/g, "").match(/([+-]?\d*)x\^2([+-]?\d*)x([+-]?\d*)([><=]=?|=)0/);
 
-      const terminos = input.replace(/ /g, "").match(/[+-]?\d*x\^?\d*|[+-]?\d+/g);
-
-      if (!terminos) {
-        resultDiv.innerHTML = "<p>No se reconocieron términos válidos.</p>";
+      if (!match) {
+        resultadoDiv.innerHTML = "<b>Formato no válido.</b> Usa el formato: ax^2 + bx + c < > = 0";
         return;
       }
 
-      let pasos = [];
-      let derivadaFinal = [];
+      let [_, a, b, c, operador] = match;
+      a = parseFloat(a === "" || a === "+" ? 1 : (a === "-" ? -1 : a));
+      b = parseFloat(b === "" || b === "+" ? 1 : (b === "-" ? -1 : b));
+      c = parseFloat(c);
 
-      terminos.forEach((t, i) => {
-        let paso = "";
-        let coef = 1;
-        let exp = 0;
+      const discriminante = b ** 2 - 4 * a * c;
+      let x1, x2;
 
-        // Término constante
-        if (!t.includes("x")) {
-          paso = `El término <strong>${t}</strong> es constante. Su derivada es 0.`;
-          derivadaFinal.push("0");
+      if (discriminante >= 0) {
+        x1 = (-b + Math.sqrt(discriminante)) / (2 * a);
+        x2 = (-b - Math.sqrt(discriminante)) / (2 * a);
+        if (x1 > x2) [x1, x2] = [x2, x1];
+      }
+
+      let solucion = "";
+
+      if (operador === "=") {
+        if (discriminante > 0) {
+          solucion = `\\(x_1 = ${x1.toFixed(2)}, x_2 = ${x2.toFixed(2)}\\)`;
+        } else if (discriminante === 0) {
+          solucion = `\\(x = ${x1.toFixed(2)}\\)`;
+        } else {
+          solucion = "No tiene solución real.";
         }
-        // Término como x o -x
-        else if (t === "x" || t === "+x" || t === "-x") {
-          coef = (t[0] === "-") ? -1 : 1;
-          exp = 1;
-          let nuevoCoef = coef * exp;
-          paso = `Derivando <strong>${t}</strong>: coef = ${coef}, exp = ${exp}. Resultado: ${nuevoCoef}`;
-          derivadaFinal.push(`${nuevoCoef}`);
+      } else {
+        if (discriminante < 0) {
+          solucion = a > 0
+            ? (operador.includes(">") ? "\\(x \in \mathbb{R}\\)" : "No hay solución real")
+            : (operador.includes("<") ? "\\(x \in \mathbb{R}\\)" : "No hay solución real");
+        } else {
+          const signo = a > 0;
+          if (operador === ">") {
+            solucion = signo ? `\\(x < ${x1.toFixed(2)} \\cup x > ${x2.toFixed(2)}\\)` : `\\(${x1.toFixed(2)} < x < ${x2.toFixed(2)}\\)`;
+          } else if (operador === ">=") {
+            solucion = signo ? `\\(x \le ${x1.toFixed(2)} \\cup x \ge ${x2.toFixed(2)}\\)` : `\\(${x1.toFixed(2)} \le x \le ${x2.toFixed(2)}\\)`;
+          } else if (operador === "<") {
+            solucion = signo ? `\\(${x1.toFixed(2)} < x < ${x2.toFixed(2)}\\)` : `\\(x < ${x1.toFixed(2)} \\cup x > ${x2.toFixed(2)}\\)`;
+          } else if (operador === "<=") {
+            solucion = signo ? `\\(${x1.toFixed(2)} \le x \le ${x2.toFixed(2)}\\)` : `\\(x \le ${x1.toFixed(2)} \\cup x \ge ${x2.toFixed(2)}\\)`;
+          }
         }
-        // Término como ax^n
-        else if (t.includes("^")) {
-          let [parteCoef, parteExp] = t.split("x^");
-          coef = (parteCoef === "" || parteCoef === "+") ? 1 : (parteCoef === "-" ? -1 : parseFloat(parteCoef));
-          exp = parseFloat(parteExp);
-          let nuevoCoef = coef * exp;
-          let nuevoExp = exp - 1;
-          paso = `Derivando <strong>${t}</strong>:  
-                  coef = ${coef}, exp = ${exp}.  
-                  Aplicamos regla de potencia:  
-                  ${coef}×${exp} = ${nuevoCoef},  
-                  nuevo exponente = ${nuevoExp}.  
-                  Resultado: ${nuevoCoef}x^${nuevoExp}`;
-          derivadaFinal.push(`${nuevoCoef}x^${nuevoExp}`);
-        }
-        // Término como ax
-        else if (t.includes("x")) {
-          coef = t.replace("x", "") || "1";
-          coef = (coef === "+") ? 1 : (coef === "-") ? -1 : parseFloat(coef);
-          exp = 1;
-          let nuevoCoef = coef * exp;
-          paso = `Derivando <strong>${t}</strong>: coef = ${coef}, exp = ${exp}. Resultado: ${nuevoCoef}`;
-          derivadaFinal.push(`${nuevoCoef}`);
+      }
+
+      resultadoDiv.innerHTML = `<p><b>Resultado:</b> \(${a}x^2 + ${b}x + ${c} ${operador} 0\)</p><p><b>Solución:</b> ${solucion}</p>`;
+      MathJax.typeset();
+
+      if (discriminante >= 0) {
+        const valores = [];
+        const f = x => a * x ** 2 + b * x + c;
+        for (let x = x1 - 2; x <= x2 + 2; x += 1) {
+          valores.push({ x, y: f(x) });
         }
 
-        pasos.push(`<div class="paso">${paso}</div>`);
-      });
+        new Chart(graficoCanvas, {
+          type: 'line',
+          data: {
+            labels: valores.map(v => v.x.toFixed(2)),
+            datasets: [{
+              label: `${a}x² + ${b}x + ${c}`,
+              data: valores.map(v => v.y),
+              borderWidth: 2,
+              fill: false
+            }]
+          },
+          options: {
+            scales: {
+              x: { title: { display: true, text: 'x' } },
+              y: { title: { display: true, text: 'f(x)' } }
+            }
+          }
+        });
 
-      resultDiv.innerHTML = `
-        <h3>Pasos:</h3>
-        ${pasos.join("")}
-        <hr>
-        <h3>Derivada final:</h3>
-        <p><strong>f'(x) = ${derivadaFinal.join(" + ").replace(/\+\s*-/g, "- ")}</strong></p>
-      `;
+        // Tabla de signos
+        const signoF = x => Math.sign(f(x));
+        let tabla = `<h3>Tabla de signos:</h3><table border="1" cellpadding="5"><tr><th>x</th>`;
+        for (let x = x1 - 2; x <= x2 + 2; x += 1) {
+          tabla += `<td>${x.toFixed(2)}</td>`;
+        }
+        tabla += "</tr><tr><th>f(x)</th>";
+        for (let x = x1 - 2; x <= x2 + 2; x += 1) {
+          const valor = f(x);
+          tabla += `<td>${valor === 0 ? "0" : (valor > 0 ? "+" : "-")}</td>`;
+        }
+        tabla += "</tr></table>";
+        tablaDiv.innerHTML = tabla;
+      }
     }
   </script>
-
 </body>
 </html>
-
 
