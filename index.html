@@ -123,17 +123,22 @@
         const derivada = math.derivative(entrada, 'x');
         const derivada_str = derivada.toString();
 
-        resultado.innerHTML += `<div class="paso">1️⃣ Definición de derivada:<br>f'(x) = lim₍ₕ→0₎ [f(x+h) - f(x)] / h</div>`;
-        resultado.innerHTML += `<div class="paso">2️⃣ f(x) = <strong>${fx_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">3️⃣ f(x+h) = <strong>${fxh_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">4️⃣ Diferencia: f(x+h) - f(x) = <strong>${diferencia_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">5️⃣ Cociente: [f(x+h) - f(x)] / h = <strong>${cociente_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">6️⃣ Derivada final (cuando h→0): f'(x) = <strong>${derivada_str}</strong> ✅</div>`;
+        resultado.innerHTML += `<div class="paso">1️⃣ <strong>Fórmula general:</strong><br>f'(x) = lim₍ₕ→0₎ [f(x+h) - f(x)] / h<br><em>Explicación:</em> Esta es la definición formal de la derivada, que representa el cambio instantáneo de f(x).</div>`;
+
+        resultado.innerHTML += `<div class="paso">2️⃣ <strong>f(x) = ${fx_str}</strong><br><em>Explicación:</em> Es la función original que quieres derivar.</div>`;
+
+        resultado.innerHTML += `<div class="paso">3️⃣ <strong>f(x+h) = ${fxh_str}</strong><br><em>Explicación:</em> Reemplazamos cada 'x' por '(x+h)' en la función original, como dice la definición.</div>`;
+
+        resultado.innerHTML += `<div class="paso">4️⃣ <strong>Diferencia: f(x+h) - f(x) = ${diferencia_str}</strong><br><em>Explicación:</em> Restamos las dos funciones para calcular cuánto cambia f(x) cuando x cambia un poco (h).</div>`;
+
+        resultado.innerHTML += `<div class="paso">5️⃣ <strong>Cociente: [f(x+h) - f(x)] / h = ${cociente_str}</strong><br><em>Explicación:</em> Dividimos por h para calcular el cambio promedio, o tasa de cambio.</div>`;
+
+        resultado.innerHTML += `<div class="paso">6️⃣ <strong>Derivada (límite cuando h→0): f'(x) = ${derivada_str}</strong> ✅<br><em>Explicación:</em> Al aplicar el límite cuando h tiende a 0, obtenemos la derivada exacta: el cambio instantáneo.</div>`;
 
         resultado.innerHTML += `<div class="analisis">
           <h3>Análisis:</h3>
-          <p>Esta derivada representa la tasa de cambio instantánea de la función original. Es decir, cómo cambia el valor de <strong>f(x)</strong> cuando x cambia ligeramente.</p>
-          <p>La derivada puede ayudarnos a entender si la función está creciendo o decreciendo, y a encontrar máximos, mínimos o puntos críticos.</p>
+          <p>Esta derivada representa la <strong>tasa de cambio instantánea</strong> de la función original. Es decir, cómo cambia el valor de <strong>f(x)</strong> cuando x cambia ligeramente.</p>
+          <p>La derivada puede ayudarnos a entender si la función está <strong>creciendo o decreciendo</strong>, y a encontrar <strong>máximos, mínimos o puntos críticos</strong>.</p>
         </div>`;
 
         const expr = math.compile(entrada);
