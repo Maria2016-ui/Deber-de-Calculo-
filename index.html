@@ -1,114 +1,93 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Calculadora de Derivadas Paso a Paso</title>
+  <title>Derivadas paso a paso - Forma larga</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.1/math.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-
-    * {
-      box-sizing: border-box;
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #e3f2fd, #e8f5e9);
+      background: linear-gradient(to right, #dfe9f3, #ffffff);
       margin: 0;
       padding: 0;
-      min-height: 100vh;
     }
 
     .contenedor {
-      max-width: 950px;
-      margin: 50px auto;
-      background: rgba(255, 255, 255, 0.7);
+      background-color: #ffffff;
       padding: 40px;
-      border-radius: 18px;
-      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
-      backdrop-filter: blur(7px);
+      max-width: 960px;
+      margin: 40px auto;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
     }
 
     h1 {
       text-align: center;
-      font-size: 2.4rem;
-      color: #1a237e;
+      color: #1e2a38;
+      margin-bottom: 30px;
     }
 
-    p {
-      margin-bottom: 10px;
-      color: #333;
-    }
-
-    input[type="text"] {
-      width: 70%;
-      padding: 12px;
+    input, button {
       font-size: 18px;
-      border: 1px solid #b0bec5;
+      padding: 12px 16px;
+      margin: 10px 5px 20px 0;
+    }
+
+    input {
+      width: 60%;
+      border: 2px solid #ccc;
       border-radius: 8px;
     }
 
     button {
-      padding: 12px 20px;
-      font-size: 18px;
-      border: none;
-      background-color: #039be5;
+      background-color: #673ab7;
       color: white;
+      border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: 0.3s;
+      transition: background 0.3s;
     }
 
     button:hover {
-      background-color: #0277bd;
+      background-color: #512da8;
     }
 
     .paso {
-      background: #e8eaf6;
+      background-color: #f0f7ff;
       padding: 16px;
-      border-left: 5px solid #3f51b5;
-      border-radius: 8px;
+      border-left: 6px solid #2196f3;
       margin-top: 15px;
+      border-radius: 8px;
     }
 
     .error {
-      background: #ffebee;
-      border-left: 5px solid #d32f2f;
+      color: #e53935;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .analisis {
+      background-color: #fff3e0;
+      padding: 16px;
+      border-left: 6px solid #ff9800;
       margin-top: 20px;
+      border-radius: 8px;
     }
 
-    th, td {
-      padding: 10px;
-      text-align: center;
-      border: 1px solid #cfd8dc;
-    }
-
-    th {
-      background-color: #c5cae9;
-    }
-
-    #grafico, #analisis {
+    #grafico {
       margin-top: 40px;
     }
   </style>
 </head>
 <body>
   <div class="contenedor">
-    <h1>🧠 Derivada paso a paso + Análisis</h1>
-    <p>Escribe la función <strong>f(x)</strong> (por ejemplo: <code>x^3 - 4x</code>):</p>
-    <input type="text" id="funcion" placeholder="Ej: x^3 - 4x">
-    <button onclick="calcularDerivada()">Resolver</button>
-    
+    <h1>Calculadora de Derivadas - Paso a Paso</h1>
+    <p>Escribe la función <strong>f(x)</strong> (ej: <code>x^2 + 3x</code>):</p>
+    <input type="text" id="funcion" placeholder="Ejemplo: x^2 + 3x">
+    <button onclick="calcularDerivada()">Calcular Derivada</button>
     <div id="resultado"></div>
     <div id="grafico"></div>
-    <div id="analisis"></div>
   </div>
 
   <script>
@@ -116,14 +95,11 @@
       const entrada = document.getElementById("funcion").value.trim();
       const resultado = document.getElementById("resultado");
       const grafico = document.getElementById("grafico");
-      const analisis = document.getElementById("analisis");
-
       resultado.innerHTML = "";
       grafico.innerHTML = "";
-      analisis.innerHTML = "";
 
       if (!entrada) {
-        resultado.innerHTML = '<div class="paso error">⚠ Por favor, escribe una función.</div>';
+        resultado.innerHTML = '<div class="paso error">⚠ Ingresa una función válida.</div>';
         return;
       }
 
@@ -147,17 +123,23 @@
         const derivada = math.derivative(entrada, 'x');
         const derivada_str = derivada.toString();
 
-        resultado.innerHTML += `<div class="paso">1️⃣ f(x) = <strong>${fx_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">2️⃣ f(x+h) = <strong>${fxh_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">3️⃣ Diferencia = <strong>${diferencia_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">4️⃣ Cociente = <strong>${cociente_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">5️⃣ Derivada final: f'(x) = <strong>${derivada_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">1️⃣ Definición de derivada:<br>f'(x) = lim₍ₕ→0₎ [f(x+h) - f(x)] / h</div>`;
+        resultado.innerHTML += `<div class="paso">2️⃣ f(x) = <strong>${fx_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">3️⃣ f(x+h) = <strong>${fxh_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">4️⃣ Diferencia: f(x+h) - f(x) = <strong>${diferencia_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">5️⃣ Cociente: [f(x+h) - f(x)] / h = <strong>${cociente_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">6️⃣ Derivada final (cuando h→0): f'(x) = <strong>${derivada_str}</strong> ✅</div>`;
 
-        // Datos para graficar
+        resultado.innerHTML += `<div class="analisis">
+          <h3>Análisis:</h3>
+          <p>Esta derivada representa la tasa de cambio instantánea de la función original. Es decir, cómo cambia el valor de <strong>f(x)</strong> cuando x cambia ligeramente.</p>
+          <p>La derivada puede ayudarnos a entender si la función está creciendo o decreciendo, y a encontrar máximos, mínimos o puntos críticos.</p>
+        </div>`;
+
         const expr = math.compile(entrada);
         const derivExpr = math.compile(derivada_str);
 
-        const xValues = math.range(-10, 10, 0.5).toArray();
+        const xValues = math.range(-10, 10, 0.2).toArray();
         const yValues = xValues.map(x => expr.evaluate({ x }));
         const yDerivValues = xValues.map(x => derivExpr.evaluate({ x }));
 
@@ -166,7 +148,7 @@
           y: yValues,
           mode: 'lines',
           name: 'f(x)',
-          line: { color: '#1e88e5', width: 3 }
+          line: { width: 3, color: '#4caf50' }
         };
 
         const trace2 = {
@@ -174,37 +156,21 @@
           y: yDerivValues,
           mode: 'lines',
           name: "f'(x)",
-          line: { color: '#d81b60', width: 3, dash: 'dot' }
+          line: { width: 3, dash: 'dot', color: '#e91e63' }
         };
 
-        Plotly.newPlot('grafico', [trace1, trace2], {
-          title: 'Gráfica de f(x) y f\'(x)',
+        const layout = {
+          title: 'Gráfico de f(x) y su derivada f\'(x)',
           xaxis: { title: 'x' },
           yaxis: { title: 'y' },
-          paper_bgcolor: '#f3f4f6',
-          plot_bgcolor: '#f3f4f6',
-          font: { family: 'Inter' }
-        });
+          plot_bgcolor: '#fefefe',
+          paper_bgcolor: '#fefefe',
+          font: { family: 'Inter, sans-serif' }
+        };
 
-        // Análisis adicional
-        let tabla = `<table><tr><th>x</th><th>f(x)</th><th>f\'(x)</th></tr>`;
-        xValues.forEach((x, i) => {
-          tabla += `<tr><td>${x.toFixed(1)}</td><td>${yValues[i].toFixed(2)}</td><td>${yDerivValues[i].toFixed(2)}</td></tr>`;
-        });
-        tabla += `</table>`;
-
-        analisis.innerHTML = `
-          <div class="paso">
-            📊 <strong>Tabla de valores</strong><br>${tabla}
-          </div>
-          <div class="paso">
-            🔍 <strong>Análisis:</strong><br>
-            - Si f'(x) > 0, la función crece en ese intervalo.<br>
-            - Si f'(x) < 0, la función decrece.<br>
-            - Si f'(x) = 0, puede haber máximos o mínimos relativos (ver tabla).
-          </div>`;
-      } catch (error) {
-        resultado.innerHTML = `<div class="paso error">❌ Error al interpretar la función. Asegúrate de escribir bien y solo usar la variable <strong>x</strong>.</div>`;
+        Plotly.newPlot('grafico', [trace1, trace2], layout);
+      } catch (e) {
+        resultado.innerHTML = `<div class="paso error">❌ Error al interpretar la función. Usa solo <strong>x</strong> como variable y asegúrate de escribir la función correctamente.</div>`;
       }
     }
   </script>
