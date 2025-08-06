@@ -31,19 +31,23 @@
 
 <script>
 function resolver() {
-  const entrada = document.getElementById("input").value;
+  const entrada = document.getElementById("input").value.trim();
   const pasos = document.getElementById("pasos");
   const analisis = document.getElementById("analisis");
   pasos.textContent = "";
   analisis.textContent = "";
 
   try {
+    // Detectar el operador correctamente, incluso con espacios
+    const operadores = ["<=", ">=", "<", ">", "="];
     let operador = null;
-    if (entrada.includes(">=")) operador = ">=";
-    else if (entrada.includes("<=")) operador = "<=";
-    else if (entrada.includes(">")) operador = ">";
-    else if (entrada.includes("<")) operador = "<";
-    else if (entrada.includes("=")) operador = "=";
+    for (let op of operadores) {
+      const regex = new RegExp(`\\s*${op.replace(/([<>=])/g, "\\$1")}\\s*`);
+      if (entrada.match(regex)) {
+        operador = op;
+        break;
+      }
+    }
 
     if (!operador) throw "No se reconoce el tipo de ecuación o inecuación";
 
@@ -68,7 +72,6 @@ function resolver() {
       pasos.textContent += `Paso 3: Resolver la inecuación\n  Raíces: x = ${roots.join(", ")}\n`;
       pasos.textContent += `Paso 4: Analizar intervalos con tabla de signos\n`;
 
-      // Análisis de intervalo
       const ordenadas = roots.map(r => parseFloat(r)).sort((a, b) => a - b);
       const signos = [];
 
@@ -103,14 +106,12 @@ function resolver() {
 function graficar(expr) {
   const ctx = document.getElementById("grafico").getContext("2d");
 
-  // Generar datos
   const xs = [], ys = [];
   for (let x = -10; x <= 10; x += 0.1) {
     xs.push(x);
     ys.push(math.evaluate(expr.toString(), {x: x}));
   }
 
-  // Eliminar gráfico anterior
   if (window.chart) window.chart.destroy();
 
   window.chart = new Chart(ctx, {
@@ -121,7 +122,8 @@ function graficar(expr) {
         label: 'f(x)',
         data: ys,
         fill: false,
-        borderWidth: 2
+        borderWidth: 2,
+        borderColor: 'blue'
       }]
     },
     options: {
@@ -136,3 +138,4 @@ function graficar(expr) {
 </script>
 </body>
 </html>
+
