@@ -1,141 +1,212 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Calculadora de Ecuaciones e Inecuaciones</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Calculadora de Derivadas Paso a Paso</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.1/math.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { font-family: Arial; margin: 20px; background-color: #f8f8f8; }
-    input, button { padding: 10px; margin: 10px 0; width: 100%; max-width: 500px; }
-    canvas { background-color: white; margin-top: 20px; }
-    .output { white-space: pre-wrap; background: #fff; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #e8f5e9);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    .contenedor {
+      max-width: 950px;
+      margin: 50px auto;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 40px;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+      backdrop-filter: blur(7px);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.4rem;
+      color: #1a237e;
+    }
+
+    p {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    input[type="text"] {
+      width: 70%;
+      padding: 12px;
+      font-size: 18px;
+      border: 1px solid #b0bec5;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 18px;
+      border: none;
+      background-color: #039be5;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #0277bd;
+    }
+
+    .paso {
+      background: #e8eaf6;
+      padding: 16px;
+      border-left: 5px solid #3f51b5;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .error {
+      background: #ffebee;
+      border-left: 5px solid #d32f2f;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #cfd8dc;
+    }
+
+    th {
+      background-color: #c5cae9;
+    }
+
+    #grafico, #analisis {
+      margin-top: 40px;
+    }
   </style>
 </head>
 <body>
+  <div class="contenedor">
+    <h1>🧠 Derivada paso a paso + Análisis</h1>
+    <p>Escribe la función <strong>f(x)</strong> (por ejemplo: <code>x^3 - 4x</code>):</p>
+    <input type="text" id="funcion" placeholder="Ej: x^3 - 4x">
+    <button onclick="calcularDerivada()">Resolver</button>
+    
+    <div id="resultado"></div>
+    <div id="grafico"></div>
+    <div id="analisis"></div>
+  </div>
 
-  <h2>📘 Calculadora de Ecuaciones e Inecuaciones</h2>
-  <p>Ejemplos: <i>x^2 - 5x + 6 = 0</i> o <i>x^2 - 4 ≥ 0</i></p>
+  <script>
+    function calcularDerivada() {
+      const entrada = document.getElementById("funcion").value.trim();
+      const resultado = document.getElementById("resultado");
+      const grafico = document.getElementById("grafico");
+      const analisis = document.getElementById("analisis");
 
-  <input id="input" placeholder="Escribe tu ecuación o inecuación aquí...">
-  <button onclick="resolver()">Resolver</button>
+      resultado.innerHTML = "";
+      grafico.innerHTML = "";
+      analisis.innerHTML = "";
 
-  <h3>🧮 Paso a Paso</h3>
-  <div id="pasos" class="output"></div>
-
-  <h3>📈 Gráfica</h3>
-  <canvas id="grafico" width="500" height="300"></canvas>
-
-  <h3>📋 Análisis del Ejercicio</h3>
-  <div id="analisis" class="output"></div>
-
-<script>
-function resolver() {
-  const entrada = document.getElementById("input").value.trim();
-  const pasos = document.getElementById("pasos");
-  const analisis = document.getElementById("analisis");
-  pasos.textContent = "";
-  analisis.textContent = "";
-
-  try {
-    // Detectar el operador correctamente, incluso con espacios
-    const operadores = ["<=", ">=", "<", ">", "="];
-    let operador = null;
-    for (let op of operadores) {
-      const regex = new RegExp(`\\s*${op.replace(/([<>=])/g, "\\$1")}\\s*`);
-      if (entrada.match(regex)) {
-        operador = op;
-        break;
-      }
-    }
-
-    if (!operador) throw "No se reconoce el tipo de ecuación o inecuación";
-
-    const partes = entrada.split(operador).map(s => s.trim());
-    const f1 = math.simplify(partes[0]);
-    const f2 = math.simplify(partes[1]);
-    const expr = math.simplify(`(${partes[0]}) - (${partes[1]})`);
-
-    // Paso a paso básico
-    pasos.textContent += `Paso 1: Mover todo al lado izquierdo\n  (${partes[0]}) - (${partes[1]}) ${operador} 0\n`;
-    pasos.textContent += `Paso 2: Simplificar\n  ${expr.toString()} ${operador} 0\n`;
-
-    // Resolver ecuación o inecuación
-    let soluciones;
-    if (operador === "=") {
-      soluciones = math.solve(expr, 'x');
-      pasos.textContent += `Paso 3: Resolver la ecuación\n  Solución: x = ${soluciones.join(", ")}\n`;
-      analisis.textContent = `🔍 La ecuación tiene ${soluciones.length} solución(es): ${soluciones.join(", ")}.\nSignifica que la gráfica corta el eje x en esos puntos.`;
-    } else {
-      const roots = math.solve(expr, 'x');
-      const a = expr.coefficients ? expr.coefficients()[0] : null;
-      pasos.textContent += `Paso 3: Resolver la inecuación\n  Raíces: x = ${roots.join(", ")}\n`;
-      pasos.textContent += `Paso 4: Analizar intervalos con tabla de signos\n`;
-
-      const ordenadas = roots.map(r => parseFloat(r)).sort((a, b) => a - b);
-      const signos = [];
-
-      const evaluar = (x) => math.evaluate(expr.toString(), {x: x});
-
-      const intervalos = [
-        [-Infinity, ordenadas[0]],
-        ...ordenadas.map((r, i) => [ordenadas[i], ordenadas[i+1]]).filter(x => x[1] !== undefined),
-        [ordenadas[ordenadas.length - 1], Infinity]
-      ];
-
-      for (let i = 0; i < intervalos.length; i++) {
-        const [a, b] = intervalos[i];
-        const punto = isFinite(a) && isFinite(b) ? (a + b) / 2 : (isFinite(a) ? a + 1 : b - 1);
-        const valor = evaluar(punto);
-        const cumple = eval(`${valor} ${operador} 0`);
-        signos.push(`${a === -Infinity ? "-∞" : a} a ${b === Infinity ? "∞" : b}: ${cumple ? "✅" : "❌"} (f(${punto.toFixed(2)}) = ${valor.toFixed(2)})`);
+      if (!entrada) {
+        resultado.innerHTML = '<div class="paso error">⚠ Por favor, escribe una función.</div>';
+        return;
       }
 
-      pasos.textContent += signos.join("\n");
-      analisis.textContent = `🔍 La inecuación se cumple en los intervalos donde aparece ✅. Observa la gráfica para confirmar visualmente.`;
-    }
+      try {
+        const fx = math.parse(entrada);
+        const fx_str = fx.toString();
 
-    graficar(expr);
+        const fxh = fx.transform(node =>
+          node.isSymbolNode && node.name === "x"
+            ? math.parse("(x + h)")
+            : node
+        );
+        const fxh_str = fxh.toString();
 
-  } catch (err) {
-    pasos.textContent = "❌ Error: " + err;
-    document.getElementById("grafico").style.display = "none";
-  }
-}
+        const diferencia = math.simplify(`(${fxh_str}) - (${fx_str})`);
+        const diferencia_str = diferencia.toString();
 
-function graficar(expr) {
-  const ctx = document.getElementById("grafico").getContext("2d");
+        const cociente = math.simplify(`(${diferencia_str}) / h`);
+        const cociente_str = cociente.toString();
 
-  const xs = [], ys = [];
-  for (let x = -10; x <= 10; x += 0.1) {
-    xs.push(x);
-    ys.push(math.evaluate(expr.toString(), {x: x}));
-  }
+        const derivada = math.derivative(entrada, 'x');
+        const derivada_str = derivada.toString();
 
-  if (window.chart) window.chart.destroy();
+        resultado.innerHTML += `<div class="paso">1️⃣ f(x) = <strong>${fx_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">2️⃣ f(x+h) = <strong>${fxh_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">3️⃣ Diferencia = <strong>${diferencia_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">4️⃣ Cociente = <strong>${cociente_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">5️⃣ Derivada final: f'(x) = <strong>${derivada_str}</strong></div>`;
 
-  window.chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: xs,
-      datasets: [{
-        label: 'f(x)',
-        data: ys,
-        fill: false,
-        borderWidth: 2,
-        borderColor: 'blue'
-      }]
-    },
-    options: {
-      responsive: false,
-      scales: {
-        x: { title: { display: true, text: 'x' } },
-        y: { title: { display: true, text: 'f(x)' } }
+        // Datos para graficar
+        const expr = math.compile(entrada);
+        const derivExpr = math.compile(derivada_str);
+
+        const xValues = math.range(-10, 10, 0.5).toArray();
+        const yValues = xValues.map(x => expr.evaluate({ x }));
+        const yDerivValues = xValues.map(x => derivExpr.evaluate({ x }));
+
+        const trace1 = {
+          x: xValues,
+          y: yValues,
+          mode: 'lines',
+          name: 'f(x)',
+          line: { color: '#1e88e5', width: 3 }
+        };
+
+        const trace2 = {
+          x: xValues,
+          y: yDerivValues,
+          mode: 'lines',
+          name: "f'(x)",
+          line: { color: '#d81b60', width: 3, dash: 'dot' }
+        };
+
+        Plotly.newPlot('grafico', [trace1, trace2], {
+          title: 'Gráfica de f(x) y f\'(x)',
+          xaxis: { title: 'x' },
+          yaxis: { title: 'y' },
+          paper_bgcolor: '#f3f4f6',
+          plot_bgcolor: '#f3f4f6',
+          font: { family: 'Inter' }
+        });
+
+        // Análisis adicional
+        let tabla = `<table><tr><th>x</th><th>f(x)</th><th>f\'(x)</th></tr>`;
+        xValues.forEach((x, i) => {
+          tabla += `<tr><td>${x.toFixed(1)}</td><td>${yValues[i].toFixed(2)}</td><td>${yDerivValues[i].toFixed(2)}</td></tr>`;
+        });
+        tabla += `</table>`;
+
+        analisis.innerHTML = `
+          <div class="paso">
+            📊 <strong>Tabla de valores</strong><br>${tabla}
+          </div>
+          <div class="paso">
+            🔍 <strong>Análisis:</strong><br>
+            - Si f'(x) > 0, la función crece en ese intervalo.<br>
+            - Si f'(x) < 0, la función decrece.<br>
+            - Si f'(x) = 0, puede haber máximos o mínimos relativos (ver tabla).
+          </div>`;
+      } catch (error) {
+        resultado.innerHTML = `<div class="paso error">❌ Error al interpretar la función. Asegúrate de escribir bien y solo usar la variable <strong>x</strong>.</div>`;
       }
     }
-  });
-}
-</script>
+  </script>
 </body>
 </html>
-
