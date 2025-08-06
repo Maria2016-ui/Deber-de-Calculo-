@@ -2,132 +2,137 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Resolución de Ecuaciones e Inecuaciones</title>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <title>Calculadora de Ecuaciones e Inecuaciones</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .output { margin-top: 20px; }
-    canvas { max-width: 600px; }
+    body { font-family: Arial; margin: 20px; background-color: #f8f8f8; }
+    input, button { padding: 10px; margin: 10px 0; width: 100%; max-width: 500px; }
+    canvas { background-color: white; margin-top: 20px; }
+    .output { white-space: pre-wrap; background: #fff; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
-  <h2>Resolver ecuaciones e inecuaciones cuadráticas</h2>
-  <p>Escribe una ecuación como <strong>x^2 - 3x + 2 = 0</strong> o una inecuación como <strong>x^2 - 3x + 2 > 0</strong></p>
 
-  <input type="text" id="input" placeholder="Ej: x^2 - 3x + 2 > 0" style="width: 400px;">
+  <h2>📘 Calculadora de Ecuaciones e Inecuaciones</h2>
+  <p>Ejemplos: <i>x^2 - 5x + 6 = 0</i> o <i>x^2 - 4 ≥ 0</i></p>
+
+  <input id="input" placeholder="Escribe tu ecuación o inecuación aquí...">
   <button onclick="resolver()">Resolver</button>
 
-  <div class="output" id="resultado"></div>
-  <div class="output" id="tabla"></div>
-  <canvas id="grafico"></canvas>
+  <h3>🧮 Paso a Paso</h3>
+  <div id="pasos" class="output"></div>
 
-  <script>
-    function resolver() {
-      const entrada = document.getElementById("input").value;
-      const resultadoDiv = document.getElementById("resultado");
-      const tablaDiv = document.getElementById("tabla");
-      const graficoCanvas = document.getElementById("grafico");
-      resultadoDiv.innerHTML = "";
-      tablaDiv.innerHTML = "";
-      const regex = /([+-]?\d*)x\^2\s*([+-]\s*\d*)x\s*([+-]\s*\d*)([<>=]+)\s*0|=\s*0/;
-      const match = entrada.replace(/\s+/g, "").match(/([+-]?\d*)x\^2([+-]?\d*)x([+-]?\d*)([><=]=?|=)0/);
+  <h3>📈 Gráfica</h3>
+  <canvas id="grafico" width="500" height="300"></canvas>
 
-      if (!match) {
-        resultadoDiv.innerHTML = "<b>Formato no válido.</b> Usa el formato: ax^2 + bx + c < > = 0";
-        return;
+  <h3>📋 Análisis del Ejercicio</h3>
+  <div id="analisis" class="output"></div>
+
+<script>
+function resolver() {
+  const entrada = document.getElementById("input").value;
+  const pasos = document.getElementById("pasos");
+  const analisis = document.getElementById("analisis");
+  pasos.textContent = "";
+  analisis.textContent = "";
+
+  try {
+    let operador = null;
+    if (entrada.includes(">=")) operador = ">=";
+    else if (entrada.includes("<=")) operador = "<=";
+    else if (entrada.includes(">")) operador = ">";
+    else if (entrada.includes("<")) operador = "<";
+    else if (entrada.includes("=")) operador = "=";
+
+    if (!operador) throw "No se reconoce el tipo de ecuación o inecuación";
+
+    const partes = entrada.split(operador).map(s => s.trim());
+    const f1 = math.simplify(partes[0]);
+    const f2 = math.simplify(partes[1]);
+    const expr = math.simplify(`(${partes[0]}) - (${partes[1]})`);
+
+    // Paso a paso básico
+    pasos.textContent += `Paso 1: Mover todo al lado izquierdo\n  (${partes[0]}) - (${partes[1]}) ${operador} 0\n`;
+    pasos.textContent += `Paso 2: Simplificar\n  ${expr.toString()} ${operador} 0\n`;
+
+    // Resolver ecuación o inecuación
+    let soluciones;
+    if (operador === "=") {
+      soluciones = math.solve(expr, 'x');
+      pasos.textContent += `Paso 3: Resolver la ecuación\n  Solución: x = ${soluciones.join(", ")}\n`;
+      analisis.textContent = `🔍 La ecuación tiene ${soluciones.length} solución(es): ${soluciones.join(", ")}.\nSignifica que la gráfica corta el eje x en esos puntos.`;
+    } else {
+      const roots = math.solve(expr, 'x');
+      const a = expr.coefficients ? expr.coefficients()[0] : null;
+      pasos.textContent += `Paso 3: Resolver la inecuación\n  Raíces: x = ${roots.join(", ")}\n`;
+      pasos.textContent += `Paso 4: Analizar intervalos con tabla de signos\n`;
+
+      // Análisis de intervalo
+      const ordenadas = roots.map(r => parseFloat(r)).sort((a, b) => a - b);
+      const signos = [];
+
+      const evaluar = (x) => math.evaluate(expr.toString(), {x: x});
+
+      const intervalos = [
+        [-Infinity, ordenadas[0]],
+        ...ordenadas.map((r, i) => [ordenadas[i], ordenadas[i+1]]).filter(x => x[1] !== undefined),
+        [ordenadas[ordenadas.length - 1], Infinity]
+      ];
+
+      for (let i = 0; i < intervalos.length; i++) {
+        const [a, b] = intervalos[i];
+        const punto = isFinite(a) && isFinite(b) ? (a + b) / 2 : (isFinite(a) ? a + 1 : b - 1);
+        const valor = evaluar(punto);
+        const cumple = eval(`${valor} ${operador} 0`);
+        signos.push(`${a === -Infinity ? "-∞" : a} a ${b === Infinity ? "∞" : b}: ${cumple ? "✅" : "❌"} (f(${punto.toFixed(2)}) = ${valor.toFixed(2)})`);
       }
 
-      let [_, a, b, c, operador] = match;
-      a = parseFloat(a === "" || a === "+" ? 1 : (a === "-" ? -1 : a));
-      b = parseFloat(b === "" || b === "+" ? 1 : (b === "-" ? -1 : b));
-      c = parseFloat(c);
+      pasos.textContent += signos.join("\n");
+      analisis.textContent = `🔍 La inecuación se cumple en los intervalos donde aparece ✅. Observa la gráfica para confirmar visualmente.`;
+    }
 
-      const discriminante = b ** 2 - 4 * a * c;
-      let x1, x2;
+    graficar(expr);
 
-      if (discriminante >= 0) {
-        x1 = (-b + Math.sqrt(discriminante)) / (2 * a);
-        x2 = (-b - Math.sqrt(discriminante)) / (2 * a);
-        if (x1 > x2) [x1, x2] = [x2, x1];
-      }
+  } catch (err) {
+    pasos.textContent = "❌ Error: " + err;
+    document.getElementById("grafico").style.display = "none";
+  }
+}
 
-      let solucion = "";
+function graficar(expr) {
+  const ctx = document.getElementById("grafico").getContext("2d");
 
-      if (operador === "=") {
-        if (discriminante > 0) {
-          solucion = `\\(x_1 = ${x1.toFixed(2)}, x_2 = ${x2.toFixed(2)}\\)`;
-        } else if (discriminante === 0) {
-          solucion = `\\(x = ${x1.toFixed(2)}\\)`;
-        } else {
-          solucion = "No tiene solución real.";
-        }
-      } else {
-        if (discriminante < 0) {
-          solucion = a > 0
-            ? (operador.includes(">") ? "\\(x \in \mathbb{R}\\)" : "No hay solución real")
-            : (operador.includes("<") ? "\\(x \in \mathbb{R}\\)" : "No hay solución real");
-        } else {
-          const signo = a > 0;
-          if (operador === ">") {
-            solucion = signo ? `\\(x < ${x1.toFixed(2)} \\cup x > ${x2.toFixed(2)}\\)` : `\\(${x1.toFixed(2)} < x < ${x2.toFixed(2)}\\)`;
-          } else if (operador === ">=") {
-            solucion = signo ? `\\(x \le ${x1.toFixed(2)} \\cup x \ge ${x2.toFixed(2)}\\)` : `\\(${x1.toFixed(2)} \le x \le ${x2.toFixed(2)}\\)`;
-          } else if (operador === "<") {
-            solucion = signo ? `\\(${x1.toFixed(2)} < x < ${x2.toFixed(2)}\\)` : `\\(x < ${x1.toFixed(2)} \\cup x > ${x2.toFixed(2)}\\)`;
-          } else if (operador === "<=") {
-            solucion = signo ? `\\(${x1.toFixed(2)} \le x \le ${x2.toFixed(2)}\\)` : `\\(x \le ${x1.toFixed(2)} \\cup x \ge ${x2.toFixed(2)}\\)`;
-          }
-        }
-      }
+  // Generar datos
+  const xs = [], ys = [];
+  for (let x = -10; x <= 10; x += 0.1) {
+    xs.push(x);
+    ys.push(math.evaluate(expr.toString(), {x: x}));
+  }
 
-      resultadoDiv.innerHTML = `<p><b>Resultado:</b> \(${a}x^2 + ${b}x + ${c} ${operador} 0\)</p><p><b>Solución:</b> ${solucion}</p>`;
-      MathJax.typeset();
+  // Eliminar gráfico anterior
+  if (window.chart) window.chart.destroy();
 
-      if (discriminante >= 0) {
-        const valores = [];
-        const f = x => a * x ** 2 + b * x + c;
-        for (let x = x1 - 2; x <= x2 + 2; x += 1) {
-          valores.push({ x, y: f(x) });
-        }
-
-        new Chart(graficoCanvas, {
-          type: 'line',
-          data: {
-            labels: valores.map(v => v.x.toFixed(2)),
-            datasets: [{
-              label: `${a}x² + ${b}x + ${c}`,
-              data: valores.map(v => v.y),
-              borderWidth: 2,
-              fill: false
-            }]
-          },
-          options: {
-            scales: {
-              x: { title: { display: true, text: 'x' } },
-              y: { title: { display: true, text: 'f(x)' } }
-            }
-          }
-        });
-
-        // Tabla de signos
-        const signoF = x => Math.sign(f(x));
-        let tabla = `<h3>Tabla de signos:</h3><table border="1" cellpadding="5"><tr><th>x</th>`;
-        for (let x = x1 - 2; x <= x2 + 2; x += 1) {
-          tabla += `<td>${x.toFixed(2)}</td>`;
-        }
-        tabla += "</tr><tr><th>f(x)</th>";
-        for (let x = x1 - 2; x <= x2 + 2; x += 1) {
-          const valor = f(x);
-          tabla += `<td>${valor === 0 ? "0" : (valor > 0 ? "+" : "-")}</td>`;
-        }
-        tabla += "</tr></table>";
-        tablaDiv.innerHTML = tabla;
+  window.chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: xs,
+      datasets: [{
+        label: 'f(x)',
+        data: ys,
+        fill: false,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: false,
+      scales: {
+        x: { title: { display: true, text: 'x' } },
+        y: { title: { display: true, text: 'f(x)' } }
       }
     }
-  </script>
+  });
+}
+</script>
 </body>
 </html>
-
-
