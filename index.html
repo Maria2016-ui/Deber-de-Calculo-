@@ -1,401 +1,544 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>A la Vuelta — Feria digital de intercambio, venta y reparación</title>
-  <meta name="description" content="Prototipo 100% digital para simular una feria de intercambio, venta y reparación. Catálogo, registro, membresía y métricas." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>a la vuelta — Prototipo administrable</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root{
-      --brand:#0ea5e9; /* sky-500 */
-      --brand-600:#0284c7; /* sky-600 */
-      --ink:#0f172a; /* slate-900 */
-      --muted:#475569; /* slate-600 */
-      --bg:#0b1220; /* dark bg */
-      --card:#0f172a;
-    }
-    html,body{font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Emoji, Noto Color Emoji, Helvetica, Arial, Apple Color Emoji, sans-serif; background:linear-gradient(180deg, #0b1220 0%, #0a0f1c 100%); color:#e2e8f0}
-    .glass{background:rgba(15,23,42,0.7); backdrop-filter: blur(10px);}
-    .ring-brand{box-shadow:0 0 0 4px rgba(14,165,233,0.2)}
+    /* Estilos mínimos adicionales */
+    .chip { @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs border; }
+    .btn { @apply inline-flex items-center gap-2 px-3 py-2 rounded-xl shadow-sm border bg-white hover:bg-gray-50; }
+    .btn-primary { @apply bg-green-600 text-white border-green-700 hover:bg-green-700; }
+    .btn-ghost { @apply bg-transparent border-transparent hover:bg-gray-100; }
+    .card { @apply bg-white rounded-2xl shadow p-4 border; }
+    .input, select, textarea { @apply w-full border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500; }
+    .hidden-admin { display: none !important; }
   </style>
 </head>
-<body class="min-h-screen">
-  <!-- HEADER / NAV -->
-  <header class="sticky top-0 z-50 backdrop-blur border-b border-white/5 bg-slate-900/60">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-      <!-- Minimal logo: monograma AV dentro de círculo -->
-      <a href="#home" class="flex items-center gap-3 group">
-        <span class="inline-grid place-items-center w-10 h-10 rounded-full bg-sky-500 text-slate-900 font-black tracking-tight">AV</span>
+<body class="bg-gray-50 text-gray-800">
+  <!-- Header -->
+  <header class="bg-white/90 backdrop-blur sticky top-0 z-40 border-b">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <!-- Sustituye el src por la ruta de tu logo -->
+        <img src="logo-a-la-vuelta.png" alt="Logo a la vuelta" class="w-12 h-12 object-contain" onerror="this.src='https://placehold.co/96x96?text=AV'">
         <div class="leading-tight">
-          <div class="text-lg sm:text-xl font-bold tracking-tight">a la vuelta</div>
-          <div class="text-xs text-slate-400 -mt-0.5">ahorra · repara · conecta</div>
+          <div class="font-black text-xl">a la vuelta</div>
+          <div class="text-sm text-gray-500">Ahorra, repara, conecta</div>
         </div>
-      </a>
-      <nav class="hidden md:flex items-center gap-1">
-        <a href="#catalogo" class="px-3 py-2 rounded-xl hover:bg-white/5">Catálogo</a>
-        <a href="#registro" class="px-3 py-2 rounded-xl hover:bg-white/5">Registro</a>
-        <a href="#membresia" class="px-3 py-2 rounded-xl hover:bg-white/5">Membresía</a>
-        <a href="#impacto" class="px-3 py-2 rounded-xl hover:bg-white/5">Impacto</a>
+      </div>
+
+      <!-- Nav -->
+      <nav class="hidden md:flex items-center gap-2">
+        <a href="#inicio" class="btn btn-ghost">Inicio</a>
+        <a href="#catalogo" class="btn btn-ghost">Catálogo</a>
+        <a href="#registro" class="btn btn-ghost">Registro</a>
+        <a href="#membresia" class="btn btn-ghost">Membresía</a>
+        <a href="#impacto" class="btn btn-ghost">Impacto</a>
       </nav>
-      <a href="#registro" class="md:inline-flex hidden px-4 py-2 rounded-2xl bg-sky-500 text-slate-900 font-semibold hover:bg-sky-400 transition">Registrarme</a>
-      <button id="menuBtn" class="md:hidden inline-flex p-2 rounded-xl hover:bg-white/10" aria-label="Abrir menú">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-      </button>
-    </div>
-    <div id="mobileNav" class="md:hidden hidden px-4 pb-4">
-      <div class="grid gap-2">
-        <a href="#catalogo" class="px-3 py-2 rounded-xl hover:bg-white/5">Catálogo</a>
-        <a href="#registro" class="px-3 py-2 rounded-xl hover:bg-white/5">Registro</a>
-        <a href="#membresia" class="px-3 py-2 rounded-xl hover:bg-white/5">Membresía</a>
-        <a href="#impacto" class="px-3 py-2 rounded-xl hover:bg-white/5">Impacto</a>
+
+      <!-- Admin controls (locked by PIN) -->
+      <div class="flex items-center gap-2">
+        <button id="adminToggle" class="btn" title="Modo admin (PIN)">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c.5304 0 1.0391-.2107 1.4142-.5858C13.7893 10.0391 14 9.53043 14 9c0-1.10457-.8954-2-2-2s-2 .89543-2 2c0 .53043.2107 1.0391.5858 1.4142C10.9609 10.7893 11.4696 11 12 11z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/></svg>
+          <span class="hidden sm:inline">Admin</span>
+        </button>
+        <button id="exportBtn" class="btn hidden-admin" title="Exportar JSON">Exportar</button>
+        <button id="importBtn" class="btn hidden-admin" title="Importar JSON">Importar</button>
+        <input id="importFile" type="file" accept="application/json" class="hidden" />
       </div>
     </div>
   </header>
 
-  <!-- HERO -->
-  <section id="home" class="relative overflow-hidden">
-    <div class="absolute inset-0 opacity-20" aria-hidden="true">
-      <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1440 560"><path d="M0 96l80 26.7C160 149 320 203 480 197.3 640 192 800 128 960 122.7 1120 117 1280 171 1360 197.3l80 26.7v240H0z" fill="url(#g)"/><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0ea5e9"/></linearGradient></defs></svg>
+  <!-- Hero / Propuesta -->
+  <section id="inicio" class="max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-2 gap-8">
+    <div class="flex flex-col justify-center">
+      <h1 class="text-3xl md:text-4xl font-black mb-4 text-green-700">Propuesta de valor: a la vuelta</h1>
+      <p class="mb-3"><strong>Nombre del servicio:</strong> <em>a la vuelta</em> — nombre corto, fácil de pronunciar y recordar, asociado a cercanía y rapidez en conseguir o intercambiar artículos.</p>
+      <p class="mb-3"><strong>Logo:</strong> Diseño circular tipo sello que evoca garantía y confianza. Dos flechas verdes forman un círculo que simboliza movimiento, economía circular e intercambio constante. La franja horizontal con “A LA VUELTA” comunica conexión y acción directa. Colores verde y gris transmiten sostenibilidad y profesionalismo.</p>
+      <p class="mb-3"><strong>Descripción clara:</strong> Plataforma digital que conecta a personas de una misma comunidad para intercambiar, vender o donar artículos en buen estado, fomentando ahorro, reutilización y economía circular.</p>
+      <p class="mb-3"><strong>Beneficios:</strong></p>
+      <ul class="list-disc list-inside mb-4">
+        <li>Ahorro económico: precios bajos o intercambios sin costo.</li>
+        <li>Impacto ambiental: menos desechos y más reutilización.</li>
+        <li>Rapidez y facilidad: todo en una sola web, desde tu celular.</li>
+        <li>Conexión comunitaria: ayuda entre vecinos y compañeros.</li>
+      </ul>
+      <p class="mb-6"><strong>Solución del problema:</strong> Muchas personas guardan objetos útiles que no usan, mientras otras los necesitan pero no pueden comprarlos nuevos. <em>a la vuelta</em> crea un punto de encuentro digital donde quien ofrece recupera valor (dinero, intercambio o espacio) y quien adquiere obtiene lo que necesita a menor costo o gratis.</p>
+      <div class="flex gap-3">
+        <a href="#catalogo" class="btn btn-primary">Ver catálogo</a>
+        <a href="#registro" class="btn">Registrarme</a>
+      </div>
     </div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-      <div class="grid md:grid-cols-2 gap-10 items-center">
-        <div>
-          <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">A la Vuelta
-            <span class="block text-sky-400">feria digital de intercambio, venta y reparación</span>
-          </h1>
-          <p class="mt-4 text-slate-300 max-w-prose">Un prototipo 100% web para validar si estudiantes y familias de Loja ahorrarían y reducirían estrés académico reutilizando y reparando artículos cerca <em>a la vuelta</em> de casa.</p>
-          <div class="mt-6 flex flex-wrap gap-3">
-            <a href="#catalogo" class="px-5 py-3 rounded-2xl bg-sky-500 text-slate-900 font-semibold hover:bg-sky-400">Ver catálogo</a>
-            <a href="#registro" class="px-5 py-3 rounded-2xl border border-white/10 hover:border-white/30">Registrarme</a>
-          </div>
-          <dl class="mt-8 grid grid-cols-3 gap-4 text-center">
-            <div class="glass rounded-2xl p-4">
-              <dt class="text-xs text-slate-400">Ítems en demo</dt>
-              <dd class="text-2xl font-bold" id="kpiItems">20</dd>
-            </div>
-            <div class="glass rounded-2xl p-4">
-              <dt class="text-xs text-slate-400">Ahorro estimado</dt>
-              <dd class="text-2xl font-bold" id="kpiAhorro">$85</dd>
-            </div>
-            <div class="glass rounded-2xl p-4">
-              <dt class="text-xs text-slate-400">Aceptación membresía</dt>
-              <dd class="text-2xl font-bold" id="kpiAceptacion">25%</dd>
-            </div>
-          </dl>
+    <div class="aspect-video bg-white rounded-2xl border shadow grid place-items-center p-8">
+      <!-- Mockup de tarjeta membresía -->
+      <div class="w-full max-w-md card">
+        <div class="flex items-center gap-3 mb-3">
+          <img src="logo-a-la-vuelta.png" alt="Logo" class="w-10 h-10 object-contain" onerror="this.src='https://placehold.co/80x80?text=AV'">
+          <div class="font-bold">Tarjeta de miembro — a la vuelta</div>
         </div>
-        <div class="glass rounded-3xl p-4 sm:p-6 border border-white/10 shadow-xl">
-          <img src="https://images.unsplash.com/photo-1516387938699-a93567ec168e?q=80&w=1600&auto=format&fit=crop" alt="Artículos reutilizables en mesa" class="rounded-2xl object-cover w-full h-72 md:h-[420px]"/>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div><span class="text-gray-500">Nombre</span><div class="font-semibold">Socio Demo</div></div>
+          <div><span class="text-gray-500">N.º socio</span><div class="font-semibold">AV-001</div></div>
+          <div><span class="text-gray-500">Beneficio</span><div class="font-semibold">10% reparaciones</div></div>
+          <div><span class="text-gray-500">Estado</span><div class="font-semibold">Activo</div></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CATÁLOGO -->
-  <section id="catalogo" class="py-14">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-end justify-between gap-4 flex-wrap">
+  <!-- Catálogo -->
+  <section id="catalogo" class="max-w-6xl mx-auto px-4 py-10">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-black text-gray-900">Catálogo</h2>
+      <div class="flex items-center gap-2">
+        <button id="addItemBtn" class="btn btn-primary hidden-admin">Añadir artículo</button>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-6">
+      <div class="grid md:grid-cols-5 gap-3">
+        <input id="searchInput" class="input md:col-span-2" placeholder="Buscar por título o descripción…" />
+        <select id="methodFilter" class="input">
+          <option value="">Método (todos)</option>
+          <option value="venta">Venta</option>
+          <option value="intercambio">Intercambio</option>
+          <option value="gratis">Gratis</option>
+        </select>
+        <select id="sortSelect" class="input">
+          <option value="recientes">Más recientes</option>
+          <option value="precio-asc">Precio: menor a mayor</option>
+          <option value="precio-desc">Precio: mayor a menor</option>
+          <option value="titulo">Título (A-Z)</option>
+        </select>
+        <button id="clearFilters" class="btn">Limpiar</button>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div id="grid" class="grid sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+    <div id="emptyState" class="hidden text-center text-gray-500 mt-8">No hay artículos que coincidan.</div>
+  </section>
+
+  <!-- Registro / Encuesta -->
+  <section id="registro" class="max-w-6xl mx-auto px-4 py-10">
+    <h2 class="text-2xl font-black mb-4">Registro y Encuesta</h2>
+    <p class="mb-4">Pega aquí tu Google Form (Archivo → Enviar → Incrustar) reemplazando el <code>src</code> del iframe.</p>
+    <div class="card">
+      <iframe id="formFrame" src="https://docs.google.com/forms/d/e/1FAIpQLSd_demo_form/viewform?embedded=true" width="100%" height="520" frameborder="0" marginheight="0" marginwidth="0">Cargando…</iframe>
+    </div>
+  </section>
+
+  <!-- Membresía -->
+  <section id="membresia" class="max-w-6xl mx-auto px-4 py-10">
+    <h2 class="text-2xl font-black mb-4">Membresía</h2>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card">
+        <h3 class="font-bold mb-2">Beneficios</h3>
+        <ul class="list-disc list-inside space-y-1">
+          <li>10% de descuento en reparaciones.</li>
+          <li>Acceso anticipado a ferias y eventos.</li>
+          <li>Soporte y promociones exclusivas.</li>
+        </ul>
+        <button class="btn btn-primary mt-4">Quiero ser miembro</button>
+      </div>
+      <div class="card">
+        <h3 class="font-bold mb-2">Mockup de tarjeta</h3>
+        <img src="https://placehold.co/400x240?text=Membres%C3%ADa+a+la+vuelta" alt="Mockup" class="rounded-xl border" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Impacto / KPIs -->
+  <section id="impacto" class="max-w-6xl mx-auto px-4 py-10">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-black">Impacto estimado</h2>
+      <button id="editKpiBtn" class="btn hidden-admin">Editar KPIs</button>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="card text-center">
+        <div class="text-sm text-gray-500">Aceptación de membresía</div>
+        <div id="kpiAceptacion" class="text-3xl font-black text-green-700">25%</div>
+      </div>
+      <div class="card text-center">
+        <div class="text-sm text-gray-500">Ahorro estimado</div>
+        <div id="kpiAhorro" class="text-3xl font-black text-green-700">$85</div>
+      </div>
+      <div class="card text-center">
+        <div class="text-sm text-gray-500">Artículos publicados</div>
+        <div id="kpiItems" class="text-3xl font-black text-green-700">0</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t bg-white py-6 mt-10">
+    <div class="max-w-6xl mx-auto px-4 text-sm text-gray-500 text-center">
+      © 2025 a la vuelta — Prototipo administrable local (sin servidor)
+    </div>
+  </footer>
+
+  <!-- Modal: Crear/Editar Item -->
+  <dialog id="itemModal" class="rounded-2xl p-0 w-full max-w-xl">
+    <form method="dialog" class="card !rounded-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 id="modalTitle" class="text-xl font-black">Nuevo artículo</h3>
+        <button class="btn">Cerrar</button>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4">
         <div>
-          <h2 class="text-3xl font-bold">Catálogo</h2>
-          <p class="text-slate-400">Filtra por tipo y busca por título o descripción.</p>
+          <label class="text-sm text-gray-600">Título</label>
+          <input id="fTitulo" class="input" required />
         </div>
-        <div class="flex gap-2 w-full md:w-auto">
-          <input id="search" type="search" placeholder="Buscar…" class="w-full md:w-64 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-sky-500" />
-          <select id="filterMetodo" class="px-4 py-2 rounded-2xl bg-white/5 border border-white/10">
-            <option value="">Todos</option>
+        <div>
+          <label class="text-sm text-gray-600">Estado/condición</label>
+          <input id="fEstado" class="input" placeholder="Usado, nuevo, buen estado…" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-sm text-gray-600">Descripción</label>
+          <textarea id="fDescripcion" class="input" rows="3"></textarea>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Precio (USD)</label>
+          <input id="fPrecio" type="number" class="input" step="0.01" min="0" />
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Método</label>
+          <select id="fMetodo" class="input">
             <option value="venta">Venta</option>
             <option value="intercambio">Intercambio</option>
             <option value="gratis">Gratis</option>
           </select>
         </div>
-      </div>
-
-      <div id="grid" class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
-    </div>
-  </section>
-
-  <!-- REGISTRO / ENCUESTA -->
-  <section id="registro" class="py-14 border-t border-white/5">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid lg:grid-cols-2 gap-8 items-start">
         <div>
-          <h2 class="text-3xl font-bold">Registro y encuesta</h2>
-          <p class="text-slate-400">Integra tu <span class="font-semibold text-slate-200">Google Form</span> aquí para medir disposición a pagar y preferencias. Reemplaza el <em>iframe</em> con el código de inserción de tu formulario.</p>
-          <ul class="mt-4 list-disc pl-5 text-slate-300 text-sm">
-            <li>¿Pagarías una membresía de $1/mes?</li>
-            <li>¿Qué te interesa más: intercambio, venta o reparaciones?</li>
-            <li>¿Con qué frecuencia necesitarías el servicio?</li>
-          </ul>
+          <label class="text-sm text-gray-600">Contacto</label>
+          <input id="fContacto" class="input" placeholder="099xxxxxxx" />
         </div>
-        <div class="glass rounded-2xl p-3 border border-white/10">
-          <!-- REEMPLAZA EL SRC por el embed de tu Google Form -->
-          <iframe title="Formulario A la Vuelta" class="w-full h-[520px] rounded-xl" srcdoc="\
-            <style>body{margin:0;font-family:Inter,system-ui;background:#0f172a;color:#e2e8f0} .box{padding:24px}</style>\
-            <div class='box'>\
-              <h3>Inserta aquí tu Google Form</h3>\
-              <p>En Google Forms &gt; Enviar &gt; &lt;&gt; &gt; copia el código y reemplaza este iframe.</p>\
-              <ol>\
-                <li>Pregunta 1: ¿Pagarías $1/mes por la membresía?</li>\
-                <li>Pregunta 2: ¿Qué modalidad prefieres? (Venta / Intercambio / Gratis)</li>\
-                <li>Pregunta 3: ¿Qué artículos usarías primero?</li>\
-              </ol>\
-            </div>\
-          "></iframe>
+        <div>
+          <label class="text-sm text-gray-600">URL de foto</label>
+          <input id="fFoto" class="input" placeholder="https://…" />
         </div>
       </div>
-    </div>
-  </section>
+      <div class="mt-5 flex justify-end gap-2">
+        <button id="deleteItemBtn" type="button" class="btn hidden-admin">Eliminar</button>
+        <button id="saveItemBtn" type="button" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </dialog>
 
-  <!-- MEMBRESÍA -->
-  <section id="membresia" class="py-14 border-t border-white/5">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-bold">Membresía</h2>
-      <p class="text-slate-400">Mockup de tarjeta de socio y beneficios de la suscripción.</p>
-
-      <div class="mt-8 grid md:grid-cols-[1.1fr,1fr] gap-8 items-center">
-        <div class="glass rounded-3xl p-6 border border-white/10">
-          <div class="grid sm:grid-cols-2 gap-6">
-            <div class="rounded-3xl p-6 bg-gradient-to-br from-sky-500 to-sky-600 text-slate-900 shadow-2xl">
-              <div class="text-xs uppercase tracking-widest font-semibold">a la vuelta</div>
-              <div class="mt-8 text-2xl font-extrabold">Tarjeta de Miembro</div>
-              <div class="mt-10 text-sm">Nombre: <span class="font-semibold">Tu Nombre</span></div>
-              <div class="text-sm">Nº socio: <span class="font-mono">000123</span></div>
-              <div class="mt-10 text-xs">Válida para ferias y talleres</div>
-            </div>
-            <ul class="space-y-3 text-slate-300 self-center">
-              <li class="flex items-start gap-3"><span class="mt-1 inline-block w-2 h-2 rounded-full bg-sky-400"></span> 10% de descuento en reparaciones.</li>
-              <li class="flex items-start gap-3"><span class="mt-1 inline-block w-2 h-2 rounded-full bg-sky-400"></span> Acceso anticipado a ferias.</li>
-              <li class="flex items-start gap-3"><span class="mt-1 inline-block w-2 h-2 rounded-full bg-sky-400"></span> Publica hasta 5 artículos/mes.</li>
-              <li class="flex items-start gap-3"><span class="mt-1 inline-block w-2 h-2 rounded-full bg-sky-400"></span> Talleres de reparación básicos.</li>
-            </ul>
-          </div>
-          <div class="mt-6 flex gap-3">
-            <a href="#registro" class="px-5 py-3 rounded-2xl bg-sky-500 text-slate-900 font-semibold hover:bg-sky-400">Quiero ser miembro</a>
-            <button class="px-5 py-3 rounded-2xl border border-white/10 hover:border-white/30" onclick="window.print()">Imprimir mockup</button>
-          </div>
+  <!-- Modal: Editar KPIs -->
+  <dialog id="kpiModal" class="rounded-2xl p-0 w-full max-w-md">
+    <form method="dialog" class="card !rounded-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-black">Editar KPIs</h3>
+        <button class="btn">Cerrar</button>
+      </div>
+      <div class="grid gap-3">
+        <div>
+          <label class="text-sm text-gray-600">% Aceptación</label>
+          <input id="fAceptacion" type="number" class="input" min="0" max="100" />
         </div>
-        <div class="glass rounded-3xl p-6 border border-white/10">
-          <h3 class="text-xl font-semibold">Preguntas frecuentes</h3>
-          <dl class="mt-4 space-y-4">
-            <div>
-              <dt class="font-medium">¿Cómo funciona la feria digital?</dt>
-              <dd class="text-slate-300">Publicas un artículo, eliges venta/intercambio/gratis y acuerdas la entrega. El prototipo simula el flujo para validación en clase.</dd>
-            </div>
-            <div>
-              <dt class="font-medium">¿La membresía es obligatoria?</dt>
-              <dd class="text-slate-300">No. Sirve para medir interés y ofrecer beneficios. En la demo usamos $1/mes como referencia.</dd>
-            </div>
-            <div>
-              <dt class="font-medium">¿Dónde veo el catálogo?</dt>
-              <dd class="text-slate-300">Más abajo en esta misma página, con filtros y búsqueda.</dd>
-            </div>
-          </dl>
+        <div>
+          <label class="text-sm text-gray-600">Ahorro estimado (USD)</label>
+          <input id="fAhorro" type="number" class="input" min="0" step="0.01" />
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- IMPACTO / KPI -->
-  <section id="impacto" class="py-14 border-t border-white/5">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-3xl font-bold">Impacto estimado</h2>
-      <p class="text-slate-400">Métricas simuladas para mostrar en clase. Puedes editar los valores en el código.</p>
-
-      <div class="mt-8 grid md:grid-cols-3 gap-6">
-        <div class="glass rounded-2xl p-6 border border-white/10">
-          <div class="text-sm text-slate-400">Aceptación membresía</div>
-          <div class="text-3xl font-extrabold" id="kpiAceptacion2">25%</div>
-          <div class="mt-3 h-2 w-full bg-white/10 rounded-full overflow-hidden">
-            <div id="barAceptacion" class="h-full bg-sky-500" style="width:25%"></div>
-          </div>
-        </div>
-        <div class="glass rounded-2xl p-6 border border-white/10">
-          <div class="text-sm text-slate-400">Ahorro total estimado</div>
-          <div class="text-3xl font-extrabold" id="kpiAhorro2">$85</div>
-          <div class="mt-3 text-sm text-slate-400">Basado en la diferencia entre precio nuevo y precio publicado.</div>
-        </div>
-        <div class="glass rounded-2xl p-6 border border-white/10">
-          <div class="text-sm text-slate-400">Artículos publicados</div>
-          <div class="text-3xl font-extrabold" id="kpiItems2">20</div>
-          <div class="mt-3 text-sm text-slate-400">Meta semanal de prueba.</div>
-        </div>
+      <div class="mt-5 flex justify-end gap-2">
+        <button id="saveKpiBtn" type="button" class="btn btn-primary">Guardar</button>
       </div>
-    </div>
-  </section>
+    </form>
+  </dialog>
 
-  <!-- FOOTER -->
-  <footer class="py-10 border-t border-white/5">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <span class="inline-grid place-items-center w-9 h-9 rounded-full bg-sky-500 text-slate-900 font-black">AV</span>
-          <span class="text-slate-400 text-sm">© <span id="year"></span> a la vuelta — prototipo académico</span>
-        </div>
-        <div class="text-sm text-slate-400">Hecho con HTML, Tailwind y JS.</div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- DATA + LOGIC -->
   <script>
-    // MENÚ MÓVIL
-    document.getElementById('menuBtn').addEventListener('click',()=>{
-      document.getElementById('mobileNav').classList.toggle('hidden');
-    });
-
-    // DATA: catálogo de ejemplo (edítalo libremente)
-    const items = [
-      {
-        titulo:"Calculadora científica Casio",
-        descripcion:"Usada, buen estado, ideal para colegio",
-        estado:"Usada, buena",
-        precio:8,
-        metodo:"venta",
-        foto:"https://images.unsplash.com/photo-1608111282453-2b95d1c1e6b3?q=80&w=1200&auto=format&fit=crop",
-        contacto:"098xxxxxxx"
-      },
-      {
-        titulo:"Libro ‘Fundamentos de Administración’",
-        descripcion:"Buen estado, busco trueque por útiles escolares",
-        estado:"Buen estado",
-        precio:null,
-        metodo:"intercambio",
-        foto:"https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop",
-        contacto:"099xxxxxxx"
-      },
-      {
-        titulo:"Cargador micro USB",
-        descripcion:"Nuevo, donación para quien lo necesite",
-        estado:"Nuevo",
-        precio:0,
-        metodo:"gratis",
-        foto:"https://images.unsplash.com/photo-1581304894492-7853551b4ae9?q=80&w=1200&auto=format&fit=crop",
-        contacto:"097xxxxxxx"
-      },
-      // Ítems adicionales de demo
-      {titulo:"Mochila escolar", descripcion:"Impermeable, poco uso", estado:"Muy buen estado", precio:6, metodo:"venta", foto:"https://images.unsplash.com/photo-1604335399105-a0c962d2ba2f?q=80&w=1200&auto=format&fit=crop", contacto:"098xxxxxxx"},
-      {titulo:"Cuadernos anillados (x3)", descripcion:"Hojas cuadriculadas", estado:"Nuevos", precio:0, metodo:"gratis", foto:"https://images.unsplash.com/photo-1473186505569-9c61870c11f9?q=80&w=1200&auto=format&fit=crop", contacto:"096xxxxxxx"},
-      {titulo:"Regla metálica 30cm", descripcion:"Sin dobleces", estado:"Usada", precio:1, metodo:"venta", foto:"https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop", contacto:"095xxxxxxx"},
-      {titulo:"Texto de Matemática I", descripcion:"Subrayado con lápiz", estado:"Buen estado", precio:0, metodo:"intercambio", foto:"https://images.unsplash.com/photo-1529148482759-b35b25c5f3f6?q=80&w=1200&auto=format&fit=crop", contacto:"095xxxxxxx"},
-      {titulo:"Cartuchera", descripcion:"Con bolsillos internos", estado:"Como nueva", precio:3, metodo:"venta", foto:"https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?q=80&w=1200&auto=format&fit=crop", contacto:"094xxxxxxx"},
-      {titulo:"Auriculares básicos", descripcion:"Funciona un lado", estado:"Para reparar", precio:1, metodo:"venta", foto:"https://images.unsplash.com/photo-1518441902113-c1d4f5a91d51?q=80&w=1200&auto=format&fit=crop", contacto:"093xxxxxxx"},
-      {titulo:"Cable HDMI", descripcion:"2 metros", estado:"Buen estado", precio:2, metodo:"venta", foto:"https://images.unsplash.com/photo-1535303311164-664fc9ec6532?q=80&w=1200&auto=format&fit=crop", contacto:"092xxxxxxx"},
-      {titulo:"Calculadora básica", descripcion:"Ideal primaria", estado:"Usada", precio:2, metodo:"venta", foto:"https://images.unsplash.com/photo-1616332739335-2bfa9ce3dc92?q=80&w=1200&auto=format&fit=crop", contacto:"098xxxxxxx"},
-      {titulo:"Estuche para laptop", descripcion:"14 pulgadas", estado:"Buen estado", precio:4, metodo:"venta", foto:"https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1200&auto=format&fit=crop", contacto:"097xxxxxxx"},
-      {titulo:"USB 16GB", descripcion:"Formateada", estado:"Buen estado", precio:3, metodo:"venta", foto:"https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1200&auto=format&fit=crop", contacto:"096xxxxxxx"},
-      {titulo:"Libro ‘Química Básica’", descripcion:"Con notas al margen", estado:"Usado", precio:0, metodo:"intercambio", foto:"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop", contacto:"095xxxxxxx"},
-      {titulo:"Corrector líquido", descripcion:"Nuevo sin abrir", estado:"Nuevo", precio:1, metodo:"venta", foto:"https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop", contacto:"095xxxxxxx"},
-      {titulo:"Lápices HB (x5)", descripcion:"Sin usar", estado:"Nuevo", precio:0, metodo:"gratis", foto:"https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=1200&auto=format&fit=crop", contacto:"094xxxxxxx"},
-      {titulo:"Compás escolar", descripcion:"Punta fina", estado:"Muy buen estado", precio:2, metodo:"venta", foto:"https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop", contacto:"093xxxxxxx"},
-      {titulo:"Forro de libros (x10)", descripcion:"Transparente", estado:"Nuevo", precio:0.5, metodo:"venta", foto:"https://images.unsplash.com/photo-1481349518771-20055b2a7b24?q=80&w=1200&auto=format&fit=crop", contacto:"092xxxxxxx"},
-      {titulo:"Regleta múltiple", descripcion:"3 tomas", estado:"Buen estado", precio:3, metodo:"venta", foto:"https://images.unsplash.com/photo-1546860172-2c63e56d0488?q=80&w=1200&auto=format&fit=crop", contacto:"091xxxxxxx"},
-      {titulo:"Bolígrafo gel (x3)", descripcion:"Azul/negro/rojo", estado:"Nuevo", precio:1, metodo:"venta", foto:"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop", contacto:"090xxxxxxx"}
+    // ====== Persistencia local ======
+    const LS_KEY_ITEMS = 'alavuelta_items';
+    const LS_KEY_KPIS  = 'alavuelta_kpis';
+    const DEFAULT_ITEMS = [
+      { id: crypto.randomUUID(), titulo: 'Calculadora científica Casio', estado: 'Usada, buena', descripcion: 'Funciona 100%. Incluye tapa.', precio: 8, metodo: 'venta', contacto: '098xxxxxxx', foto: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop' , createdAt: Date.now()-1000000 },
+      { id: crypto.randomUUID(), titulo: 'Libro “Fundamentos de Administración”', estado: 'Buen estado', descripcion: 'Cambio por útiles escolares (cuadernos, lápices).', precio: 0, metodo: 'intercambio', contacto: '099xxxxxxx', foto: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop', createdAt: Date.now()-800000 },
+      { id: crypto.randomUUID(), titulo: 'Cargador micro USB', estado: 'Nuevo, donación', descripcion: 'Entrega en campus. 5V/2A.', precio: 0, metodo: 'gratis', contacto: '097xxxxxxx', foto: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1200&auto=format&fit=crop', createdAt: Date.now()-600000 }
     ];
+    const DEFAULT_KPIS = { aceptacion: 25, ahorro: 85 };
 
+    function loadItems(){
+      const raw = localStorage.getItem(LS_KEY_ITEMS);
+      return raw ? JSON.parse(raw) : DEFAULT_ITEMS.slice();
+    }
+    function saveItems(items){ localStorage.setItem(LS_KEY_ITEMS, JSON.stringify(items)); }
+
+    function loadKpis(){
+      const raw = localStorage.getItem(LS_KEY_KPIS);
+      return raw ? JSON.parse(raw) : { ...DEFAULT_KPIS };
+    }
+    function saveKpis(k){ localStorage.setItem(LS_KEY_KPIS, JSON.stringify(k)); }
+
+    // ====== Estado de UI ======
+    let items = loadItems();
+    let kpis  = loadKpis();
+    let admin = false; // modo admin
+    let editingId = null;
+
+    // ====== Elementos ======
     const grid = document.getElementById('grid');
-    const search = document.getElementById('search');
-    const filterMetodo = document.getElementById('filterMetodo');
+    const emptyState = document.getElementById('emptyState');
+    const searchInput = document.getElementById('searchInput');
+    const methodFilter = document.getElementById('methodFilter');
+    const sortSelect = document.getElementById('sortSelect');
+    const clearFilters = document.getElementById('clearFilters');
 
-    function metodoBadge(m){
-      const map={venta:'bg-emerald-500 text-emerald-950', intercambio:'bg-amber-400 text-amber-950', gratis:'bg-violet-400 text-violet-950'}
-      return map[m]||'bg-slate-200 text-slate-900'
+    const addItemBtn = document.getElementById('addItemBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importFile = document.getElementById('importFile');
+    const adminToggle = document.getElementById('adminToggle');
+
+    const itemModal = document.getElementById('itemModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const fTitulo = document.getElementById('fTitulo');
+    const fEstado = document.getElementById('fEstado');
+    const fDescripcion = document.getElementById('fDescripcion');
+    const fPrecio = document.getElementById('fPrecio');
+    const fMetodo = document.getElementById('fMetodo');
+    const fContacto = document.getElementById('fContacto');
+    const fFoto = document.getElementById('fFoto');
+    const saveItemBtn = document.getElementById('saveItemBtn');
+    const deleteItemBtn = document.getElementById('deleteItemBtn');
+
+    const editKpiBtn = document.getElementById('editKpiBtn');
+    const kpiModal = document.getElementById('kpiModal');
+    const fAceptacion = document.getElementById('fAceptacion');
+    const fAhorro = document.getElementById('fAhorro');
+    const kpiAceptacion = document.getElementById('kpiAceptacion');
+    const kpiAhorro = document.getElementById('kpiAhorro');
+    const kpiItems = document.getElementById('kpiItems');
+    const saveKpiBtn = document.getElementById('saveKpiBtn');
+
+    // ====== Render ======
+    function formatPrice(x){
+      if (!x || Number(x) === 0) return '—';
+      return `$${Number(x).toLocaleString('es-EC', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
     }
 
-    function priceText(p, m){
-      if(m==='gratis') return 'Gratis/Retiro';
-      if(m==='intercambio') return 'Intercambio';
-      if(p===0 || p===null || p===undefined) return '—';
-      return `$${p}`;
+    function renderKPIs(){
+      kpiAceptacion.textContent = `${kpis.aceptacion}%`;
+      kpiAhorro.textContent = `$${Number(kpis.ahorro).toLocaleString('es-EC', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+      kpiItems.textContent = items.length;
+    }
+
+    function cardTemplate(it){
+      const badge = it.metodo === 'venta' ? 'bg-green-100 text-green-700 border-green-300' : it.metodo === 'intercambio' ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-gray-100 text-gray-700 border-gray-300';
+      const metodoTxt = it.metodo.charAt(0).toUpperCase() + it.metodo.slice(1);
+      return `
+        <div class="card flex flex-col">
+          <img src="${it.foto || 'https://placehold.co/600x400?text=Sin+foto'}" alt="${it.titulo}" class="rounded-xl h-40 w-full object-cover mb-3">
+          <div class="flex-1">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <h3 class="font-bold line-clamp-1">${it.titulo}</h3>
+              <span class="chip ${badge}">${metodoTxt}</span>
+            </div>
+            <div class="text-sm text-gray-600 line-clamp-2">${it.descripcion || ''}</div>
+            <div class="mt-2 font-extrabold text-green-700">${formatPrice(it.precio)}</div>
+            <div class="text-xs text-gray-500">${it.estado || ''}</div>
+            <div class="text-xs text-gray-500 mt-1">Contacto: ${it.contacto || '—'}</div>
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-2">
+            <button data-id="${it.id}" class="btn btn-ghost view-btn">Ver</button>
+            <button data-id="${it.id}" class="btn btn-ghost edit-btn ${admin? '' : 'hidden-admin'}">Editar</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function applyFilters(data){
+      const q = (searchInput.value || '').toLowerCase();
+      const m = methodFilter.value;
+      let arr = data.filter(d => (d.titulo + ' ' + (d.descripcion||'')).toLowerCase().includes(q));
+      if (m) arr = arr.filter(d => d.metodo === m);
+      const s = sortSelect.value;
+      if (s === 'precio-asc') arr.sort((a,b)=>(Number(a.precio||0) - Number(b.precio||0)));
+      else if (s === 'precio-desc') arr.sort((a,b)=>(Number(b.precio||0) - Number(a.precio||0)));
+      else if (s === 'titulo') arr.sort((a,b)=>a.titulo.localeCompare(b.titulo));
+      else arr.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+      return arr;
     }
 
     function render(){
-      const q = (search.value||'').toLowerCase().trim();
-      const f = (filterMetodo.value||'').toLowerCase();
-      const list = items.filter(it=>{
-        const okMetodo = f? it.metodo===f : true;
-        const texto = `${it.titulo} ${it.descripcion} ${it.estado}`.toLowerCase();
-        const okTexto = q? texto.includes(q) : true;
-        return okMetodo && okTexto;
+      renderKPIs();
+      const arr = applyFilters(items);
+      grid.innerHTML = arr.map(cardTemplate).join('');
+      emptyState.classList.toggle('hidden', arr.length !== 0);
+      // Bind per-card actions
+      grid.querySelectorAll('.view-btn').forEach(b=>b.addEventListener('click', onViewItem));
+      grid.querySelectorAll('.edit-btn').forEach(b=>b.addEventListener('click', onEditItem));
+      // Toggle admin-only visibility
+      document.querySelectorAll('.hidden-admin').forEach(el=>{
+        el.style.display = admin ? '' : 'none';
       });
-      grid.innerHTML = list.map((it,idx)=>`
-        <article class="glass rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition">
-          <div class="aspect-[4/3] overflow-hidden">
-            <img src="${it.foto}" alt="${it.titulo}" class="w-full h-full object-cover" loading="lazy"/>
-          </div>
-          <div class="p-4">
-            <div class="flex items-center justify-between gap-3">
-              <h3 class="font-semibold leading-tight">${it.titulo}</h3>
-              <span class="text-xs px-2 py-1 rounded-full ${metodoBadge(it.metodo)} capitalize">${it.metodo}</span>
-            </div>
-            <p class="text-sm text-slate-300 mt-1">${it.descripcion}</p>
-            <div class="mt-3 flex items-center justify-between">
-              <span class="font-bold">${priceText(it.precio, it.metodo)}</span>
-              <button class="text-sm px-3 py-1.5 rounded-xl border border-white/10 hover:border-white/30" onclick="verFicha(${idx})">Ver ficha</button>
-            </div>
-          </div>
-        </article>
-      `).join('');
-
-      // KPIs dinámicos (en base al listado actual)
-      document.getElementById('kpiItems').textContent = list.length;
-      document.getElementById('kpiItems2').textContent = list.length;
     }
 
-    search.addEventListener('input', render);
-    filterMetodo.addEventListener('change', render);
+    // ====== Admin auth (PIN simple local) ======
+    const PIN_KEY = 'alavuelta_pin';
+    function getPin(){ return localStorage.getItem(PIN_KEY) || '1234'; }
 
-    // Modal simple para ver ficha
-    const modal = document.createElement('div');
-    modal.id = 'modal';
-    modal.className = 'fixed inset-0 hidden items-center justify-center bg-black/60 p-4';
-    modal.innerHTML = `
-      <div class='glass max-w-xl w-full rounded-2xl border border-white/10 overflow-hidden'>
-        <div class='flex items-center justify-between p-4 border-b border-white/10'>
-          <h4 id='modalTitle' class='font-semibold'>Ficha</h4>
-          <button class='p-2 hover:bg-white/10 rounded-xl' onclick='cerrarModal()' aria-label='Cerrar'>×</button>
-        </div>
-        <div class='p-4 grid sm:grid-cols-2 gap-4'>
-          <img id='modalImg' class='w-full h-48 object-cover rounded-xl' alt='Imagen artículo'/>
-          <div>
-            <p id='modalDesc' class='text-slate-300'></p>
-            <p class='mt-2 text-sm text-slate-400'>Estado: <span id='modalEstado'></span></p>
-            <p class='mt-1 text-sm text-slate-400'>Método: <span id='modalMetodo' class='capitalize'></span></p>
-            <p class='mt-1 text-sm text-slate-400'>Precio: <span id='modalPrecio'></span></p>
-            <p class='mt-3 text-sm'>Contacto: <span id='modalContacto' class='font-semibold'></span></p>
-          </div>
-        </div>
-        <div class='p-4 border-t border-white/10 flex items-center justify-end gap-3'>
-          <a href='#registro' class='px-4 py-2 rounded-xl bg-sky-500 text-slate-900 font-semibold hover:bg-sky-400'>Me interesa</a>
-          <button class='px-4 py-2 rounded-xl border border-white/10 hover:border-white/30' onclick='cerrarModal()'>Cerrar</button>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
+    adminToggle.addEventListener('click', ()=>{
+      const current = getPin();
+      const input = prompt(admin ? 'Salir de modo admin? Escribe PIN para confirmar:' : 'Entrar a modo admin — PIN (default 1234):');
+      if (input === null) return; // cancel
+      if (input === current) {
+        admin = !admin;
+        alert(admin ? 'Modo admin activado' : 'Modo admin desactivado');
+        render();
+      } else if (!admin) {
+        // permitir cambio de PIN si ya eres admin (no lo eres aún), así que nada
+        alert('PIN incorrecto');
+      }
+    });
 
-    window.verFicha = (idx)=>{
-      const it = items[idx];
-      document.getElementById('modalTitle').textContent = it.titulo;
-      document.getElementById('modalImg').src = it.foto;
-      document.getElementById('modalImg').alt = it.titulo;
-      document.getElementById('modalDesc').textContent = it.descripcion;
-      document.getElementById('modalEstado').textContent = it.estado;
-      document.getElementById('modalMetodo').textContent = it.metodo;
-      document.getElementById('modalPrecio').textContent = priceText(it.precio, it.metodo);
-      document.getElementById('modalContacto').textContent = it.contacto;
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+    // ====== CRUD Items ======
+    addItemBtn.addEventListener('click', ()=>{
+      editingId = null;
+      modalTitle.textContent = 'Nuevo artículo';
+      fTitulo.value = fEstado.value = fDescripcion.value = fContacto.value = fFoto.value = '';
+      fPrecio.value = '';
+      fMetodo.value = 'venta';
+      itemModal.showModal();
+      deleteItemBtn.style.display = 'none';
+    });
+
+    function findItem(id){ return items.find(x=>x.id===id); }
+
+    function onEditItem(e){
+      const id = e.currentTarget.getAttribute('data-id');
+      const it = findItem(id);
+      if (!it) return;
+      editingId = id;
+      modalTitle.textContent = 'Editar artículo';
+      fTitulo.value = it.titulo || '';
+      fEstado.value = it.estado || '';
+      fDescripcion.value = it.descripcion || '';
+      fPrecio.value = it.precio || 0;
+      fMetodo.value = it.metodo || 'venta';
+      fContacto.value = it.contacto || '';
+      fFoto.value = it.foto || '';
+      deleteItemBtn.style.display = admin ? '' : 'none';
+      itemModal.showModal();
     }
 
-    window.cerrarModal = ()=>{
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+    function onViewItem(e){
+      const id = e.currentTarget.getAttribute('data-id');
+      const it = findItem(id);
+      if (!it) return;
+      // reutilizamos modal en modo solo lectura
+      editingId = id;
+      modalTitle.textContent = 'Detalle de artículo';
+      fTitulo.value = it.titulo || '';
+      fEstado.value = it.estado || '';
+      fDescripcion.value = it.descripcion || '';
+      fPrecio.value = it.precio || 0;
+      fMetodo.value = it.metodo || 'venta';
+      fContacto.value = it.contacto || '';
+      fFoto.value = it.foto || '';
+      deleteItemBtn.style.display = admin ? '' : 'none';
+      itemModal.showModal();
     }
 
-    // Inicialización
+    saveItemBtn.addEventListener('click', ()=>{
+      const data = {
+        titulo: fTitulo.value.trim(),
+        estado: fEstado.value.trim(),
+        descripcion: fDescripcion.value.trim(),
+        precio: Number(fPrecio.value||0),
+        metodo: fMetodo.value,
+        contacto: fContacto.value.trim(),
+        foto: fFoto.value.trim()
+      };
+      if (!data.titulo) { alert('El título es obligatorio'); return; }
+      if (!editingId){
+        items.unshift({ id: crypto.randomUUID(), ...data, createdAt: Date.now() });
+      } else {
+        const idx = items.findIndex(x=>x.id===editingId);
+        if (idx>-1) items[idx] = { ...items[idx], ...data };
+      }
+      saveItems(items);
+      render();
+      itemModal.close();
+    });
+
+    deleteItemBtn.addEventListener('click', ()=>{
+      if (!editingId) return;
+      if (!confirm('¿Eliminar este artículo?')) return;
+      items = items.filter(x=>x.id!==editingId);
+      saveItems(items);
+      render();
+      itemModal.close();
+    });
+
+    // ====== Filtros ======
+    [searchInput, methodFilter, sortSelect].forEach(el=>el.addEventListener('input', render));
+    clearFilters.addEventListener('click', ()=>{
+      searchInput.value=''; methodFilter.value=''; sortSelect.value='recientes'; render();
+    });
+
+    // ====== Import / Export ======
+    exportBtn.addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(items, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'catalogo-alavuelta.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    importBtn.addEventListener('click', ()=> importFile.click());
+    importFile.addEventListener('change', async (e)=>{
+      const file = e.target.files[0];
+      if (!file) return;
+      try{
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (!Array.isArray(data)) throw new Error('JSON inválido');
+        // Normalizar
+        items = data.map(d=>({
+          id: d.id || crypto.randomUUID(),
+          titulo: d.titulo||'', estado: d.estado||'', descripcion: d.descripcion||'',
+          precio: Number(d.precio||0), metodo: d.metodo||'venta', contacto: d.contacto||'',
+          foto: d.foto||'', createdAt: d.createdAt || Date.now()
+        }));
+        saveItems(items);
+        render();
+      }catch(err){ alert('No se pudo importar: '+err.message); }
+      finally{ e.target.value=''; }
+    });
+
+    // ====== KPIs ======
+    editKpiBtn.addEventListener('click', ()=>{
+      fAceptacion.value = kpis.aceptacion;
+      fAhorro.value = kpis.ahorro;
+      kpiModal.showModal();
+    });
+
+    saveKpiBtn.addEventListener('click', ()=>{
+      const a = Number(fAceptacion.value||0);
+      const h = Number(fAhorro.value||0);
+      kpis = { aceptacion: Math.min(Math.max(a,0),100), ahorro: Math.max(h,0) };
+      saveKpis(kpis); render(); kpiModal.close();
+    });
+
+    // ====== Init ======
+    function setAdminUI(){
+      document.querySelectorAll('.hidden-admin').forEach(el=>{ el.style.display = admin ? '' : 'none'; });
+    }
+
     render();
-    document.getElementById('year').textContent = new Date().getFullYear();
+    setAdminUI();
+
+    // Atajo: Ctrl+M para alternar admin con PIN
+    document.addEventListener('keydown', (e)=>{
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='m') adminToggle.click();
+    });
   </script>
 </body>
 </html>
