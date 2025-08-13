@@ -1,183 +1,401 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Derivadas paso a paso - Forma larga</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.1/math.min.js"></script>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A la Vuelta — Feria digital de intercambio, venta y reparación</title>
+  <meta name="description" content="Prototipo 100% digital para simular una feria de intercambio, venta y reparación. Catálogo, registro, membresía y métricas." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(to right, #dfe9f3, #ffffff);
-      margin: 0;
-      padding: 0;
+    :root{
+      --brand:#0ea5e9; /* sky-500 */
+      --brand-600:#0284c7; /* sky-600 */
+      --ink:#0f172a; /* slate-900 */
+      --muted:#475569; /* slate-600 */
+      --bg:#0b1220; /* dark bg */
+      --card:#0f172a;
     }
-
-    .contenedor {
-      background-color: #ffffff;
-      padding: 40px;
-      max-width: 960px;
-      margin: 40px auto;
-      border-radius: 16px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    h1 {
-      text-align: center;
-      color: #1e2a38;
-      margin-bottom: 30px;
-    }
-
-    input, button {
-      font-size: 18px;
-      padding: 12px 16px;
-      margin: 10px 5px 20px 0;
-    }
-
-    input {
-      width: 60%;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-    }
-
-    button {
-      background-color: #673ab7;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    button:hover {
-      background-color: #512da8;
-    }
-
-    .paso {
-      background-color: #f0f7ff;
-      padding: 16px;
-      border-left: 6px solid #2196f3;
-      margin-top: 15px;
-      border-radius: 8px;
-    }
-
-    .error {
-      color: #e53935;
-    }
-
-    .analisis {
-      background-color: #fff3e0;
-      padding: 16px;
-      border-left: 6px solid #ff9800;
-      margin-top: 20px;
-      border-radius: 8px;
-    }
-
-    #grafico {
-      margin-top: 40px;
-    }
+    html,body{font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Emoji, Noto Color Emoji, Helvetica, Arial, Apple Color Emoji, sans-serif; background:linear-gradient(180deg, #0b1220 0%, #0a0f1c 100%); color:#e2e8f0}
+    .glass{background:rgba(15,23,42,0.7); backdrop-filter: blur(10px);}
+    .ring-brand{box-shadow:0 0 0 4px rgba(14,165,233,0.2)}
   </style>
 </head>
-<body>
-  <div class="contenedor">
-    <h1>Calculadora de Derivadas - Paso a Paso</h1>
-    <p>Escribe la función <strong>f(x)</strong> (ej: <code>x^2 + 3x</code>):</p>
-    <input type="text" id="funcion" placeholder="Ejemplo: x^2 + 3x">
-    <button onclick="calcularDerivada()">Calcular Derivada</button>
-    <div id="resultado"></div>
-    <div id="grafico"></div>
-  </div>
+<body class="min-h-screen">
+  <!-- HEADER / NAV -->
+  <header class="sticky top-0 z-50 backdrop-blur border-b border-white/5 bg-slate-900/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      <!-- Minimal logo: monograma AV dentro de círculo -->
+      <a href="#home" class="flex items-center gap-3 group">
+        <span class="inline-grid place-items-center w-10 h-10 rounded-full bg-sky-500 text-slate-900 font-black tracking-tight">AV</span>
+        <div class="leading-tight">
+          <div class="text-lg sm:text-xl font-bold tracking-tight">a la vuelta</div>
+          <div class="text-xs text-slate-400 -mt-0.5">ahorra · repara · conecta</div>
+        </div>
+      </a>
+      <nav class="hidden md:flex items-center gap-1">
+        <a href="#catalogo" class="px-3 py-2 rounded-xl hover:bg-white/5">Catálogo</a>
+        <a href="#registro" class="px-3 py-2 rounded-xl hover:bg-white/5">Registro</a>
+        <a href="#membresia" class="px-3 py-2 rounded-xl hover:bg-white/5">Membresía</a>
+        <a href="#impacto" class="px-3 py-2 rounded-xl hover:bg-white/5">Impacto</a>
+      </nav>
+      <a href="#registro" class="md:inline-flex hidden px-4 py-2 rounded-2xl bg-sky-500 text-slate-900 font-semibold hover:bg-sky-400 transition">Registrarme</a>
+      <button id="menuBtn" class="md:hidden inline-flex p-2 rounded-xl hover:bg-white/10" aria-label="Abrir menú">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+      </button>
+    </div>
+    <div id="mobileNav" class="md:hidden hidden px-4 pb-4">
+      <div class="grid gap-2">
+        <a href="#catalogo" class="px-3 py-2 rounded-xl hover:bg-white/5">Catálogo</a>
+        <a href="#registro" class="px-3 py-2 rounded-xl hover:bg-white/5">Registro</a>
+        <a href="#membresia" class="px-3 py-2 rounded-xl hover:bg-white/5">Membresía</a>
+        <a href="#impacto" class="px-3 py-2 rounded-xl hover:bg-white/5">Impacto</a>
+      </div>
+    </div>
+  </header>
 
+  <!-- HERO -->
+  <section id="home" class="relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20" aria-hidden="true">
+      <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 1440 560"><path d="M0 96l80 26.7C160 149 320 203 480 197.3 640 192 800 128 960 122.7 1120 117 1280 171 1360 197.3l80 26.7v240H0z" fill="url(#g)"/><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0ea5e9"/></linearGradient></defs></svg>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+      <div class="grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">A la Vuelta
+            <span class="block text-sky-400">feria digital de intercambio, venta y reparación</span>
+          </h1>
+          <p class="mt-4 text-slate-300 max-w-prose">Un prototipo 100% web para validar si estudiantes y familias de Loja ahorrarían y reducirían estrés académico reutilizando y reparando artículos cerca <em>a la vuelta</em> de casa.</p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href="#catalogo" class="px-5 py-3 rounded-2xl bg-sky-500 text-slate-900 font-semibold hover:bg-sky-400">Ver catálogo</a>
+            <a href="#registro" class="px-5 py-3 rounded-2xl border border-white/10 hover:border-white/30">Registrarme</a>
+          </div>
+          <dl class="mt-8 grid grid-cols-3 gap-4 text-center">
+            <div class="glass rounded-2xl p-4">
+              <dt class="text-xs text-slate-400">Ítems en demo</dt>
+              <dd class="text-2xl font-bold" id="kpiItems">20</dd>
+            </div>
+            <div class="glass rounded-2xl p-4">
+              <dt class="text-xs text-slate-400">Ahorro estimado</dt>
+              <dd class="text-2xl font-bold" id="kpiAhorro">$85</dd>
+            </div>
+            <div class="glass rounded-2xl p-4">
+              <dt class="text-xs text-slate-400">Aceptación membresía</dt>
+              <dd class="text-2xl font-bold" id="kpiAceptacion">25%</dd>
+            </div>
+          </dl>
+        </div>
+        <div class="glass rounded-3xl p-4 sm:p-6 border border-white/10 shadow-xl">
+          <img src="https://images.unsplash.com/photo-1516387938699-a93567ec168e?q=80&w=1600&auto=format&fit=crop" alt="Artículos reutilizables en mesa" class="rounded-2xl object-cover w-full h-72 md:h-[420px]"/>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATÁLOGO -->
+  <section id="catalogo" class="py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-end justify-between gap-4 flex-wrap">
+        <div>
+          <h2 class="text-3xl font-bold">Catálogo</h2>
+          <p class="text-slate-400">Filtra por tipo y busca por título o descripción.</p>
+        </div>
+        <div class="flex gap-2 w-full md:w-auto">
+          <input id="search" type="search" placeholder="Buscar…" class="w-full md:w-64 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+          <select id="filterMetodo" class="px-4 py-2 rounded-2xl bg-white/5 border border-white/10">
+            <option value="">Todos</option>
+            <option value="venta">Venta</option>
+            <option value="intercambio">Intercambio</option>
+            <option value="gratis">Gratis</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="grid" class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+    </div>
+  </section>
+
+  <!-- REGISTRO / ENCUESTA -->
+  <section id="registro" class="py-14 border-t border-white/5">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-8 items-start">
+        <div>
+          <h2 class="text-3xl font-bold">Registro y encuesta</h2>
+          <p class="text-slate-400">Integra tu <span class="font-semibold text-slate-200">Google Form</span> aquí para medir disposición a pagar y preferencias. Reemplaza el <em>iframe</em> con el código de inserción de tu formulario.</p>
+          <ul class="mt-4 list-disc pl-5 text-slate-300 text-sm">
+            <li>¿Pagarías una membresía de $1/mes?</li>
+            <li>¿Qué te interesa más: intercambio, venta o reparaciones?</li>
+            <li>¿Con qué frecuencia necesitarías el servicio?</li>
+          </ul>
+        </div>
+        <div class="glass rounded-2xl p-3 border border-white/10">
+          <!-- REEMPLAZA EL SRC por el embed de tu Google Form -->
+          <iframe title="Formulario A la Vuelta" class="w-full h-[520px] rounded-xl" srcdoc="\
+            <style>body{margin:0;font-family:Inter,system-ui;background:#0f172a;color:#e2e8f0} .box{padding:24px}</style>\
+            <div class='box'>\
+              <h3>Inserta aquí tu Google Form</h3>\
+              <p>En Google Forms &gt; Enviar &gt; &lt;&gt; &gt; copia el código y reemplaza este iframe.</p>\
+              <ol>\
+                <li>Pregunta 1: ¿Pagarías $1/mes por la membresía?</li>\
+                <li>Pregunta 2: ¿Qué modalidad prefieres? (Venta / Intercambio / Gratis)</li>\
+                <li>Pregunta 3: ¿Qué artículos usarías primero?</li>\
+              </ol>\
+            </div>\
+          "></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEMBRESÍA -->
+  <section id="membresia" class="py-14 border-t border-white/5">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold">Membresía</h2>
+      <p class="text-slate-400">Mockup de tarjeta de socio y beneficios de la suscripción.</p>
+
+      <div class="mt-8 grid md:grid-cols-[1.1fr,1fr] gap-8 items-center">
+        <div class="glass rounded-3xl p-6 border border-white/10">
+          <div class="grid sm:grid-cols-2 gap-6">
+            <div class="rounded-3xl p-6 bg-gradient-to-br from-sky-500 to-sky-600 text-slate-900 shadow-2xl">
+              <div class="text-xs uppercase tracking-widest font-semibold">a la vuelta</div>
+              <div class="mt-8 text-2xl font-extrabold">Tarjeta de Miembro</div>
+              <div class="mt-10 text-sm">Nombre: <span class="font-semibold">Tu Nombre</span></div>
+              <div class="text-sm">Nº socio: <span class="font-mono">000123</span></div>
+              <div class="mt-10 text-xs">Válida para ferias y talleres</div>
+            </div>
+            <ul class="space-y-3 text-slate-300 self-center">
+              <li class="flex items-start gap-3"><span class="mt-1 inline-block w-2 h-2 rounded-full bg-sky-400"></span> 10% de descuento en reparaciones.</li>
+              <li class="flex items-start gap-3"><span class="mt-1 inline-block w-2 h-2 rounded-full bg-sky-400"></span> Acceso anticipado a ferias.</li>
+              <li class="flex items-start gap-3"><span class="mt-1 inline-block w-2 h-2 rounded-full bg-sky-400"></span> Publica hasta 5 artículos/mes.</li>
+              <li class="flex items-start gap-3"><span class="mt-1 inline-block w-2 h-2 rounded-full bg-sky-400"></span> Talleres de reparación básicos.</li>
+            </ul>
+          </div>
+          <div class="mt-6 flex gap-3">
+            <a href="#registro" class="px-5 py-3 rounded-2xl bg-sky-500 text-slate-900 font-semibold hover:bg-sky-400">Quiero ser miembro</a>
+            <button class="px-5 py-3 rounded-2xl border border-white/10 hover:border-white/30" onclick="window.print()">Imprimir mockup</button>
+          </div>
+        </div>
+        <div class="glass rounded-3xl p-6 border border-white/10">
+          <h3 class="text-xl font-semibold">Preguntas frecuentes</h3>
+          <dl class="mt-4 space-y-4">
+            <div>
+              <dt class="font-medium">¿Cómo funciona la feria digital?</dt>
+              <dd class="text-slate-300">Publicas un artículo, eliges venta/intercambio/gratis y acuerdas la entrega. El prototipo simula el flujo para validación en clase.</dd>
+            </div>
+            <div>
+              <dt class="font-medium">¿La membresía es obligatoria?</dt>
+              <dd class="text-slate-300">No. Sirve para medir interés y ofrecer beneficios. En la demo usamos $1/mes como referencia.</dd>
+            </div>
+            <div>
+              <dt class="font-medium">¿Dónde veo el catálogo?</dt>
+              <dd class="text-slate-300">Más abajo en esta misma página, con filtros y búsqueda.</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMPACTO / KPI -->
+  <section id="impacto" class="py-14 border-t border-white/5">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold">Impacto estimado</h2>
+      <p class="text-slate-400">Métricas simuladas para mostrar en clase. Puedes editar los valores en el código.</p>
+
+      <div class="mt-8 grid md:grid-cols-3 gap-6">
+        <div class="glass rounded-2xl p-6 border border-white/10">
+          <div class="text-sm text-slate-400">Aceptación membresía</div>
+          <div class="text-3xl font-extrabold" id="kpiAceptacion2">25%</div>
+          <div class="mt-3 h-2 w-full bg-white/10 rounded-full overflow-hidden">
+            <div id="barAceptacion" class="h-full bg-sky-500" style="width:25%"></div>
+          </div>
+        </div>
+        <div class="glass rounded-2xl p-6 border border-white/10">
+          <div class="text-sm text-slate-400">Ahorro total estimado</div>
+          <div class="text-3xl font-extrabold" id="kpiAhorro2">$85</div>
+          <div class="mt-3 text-sm text-slate-400">Basado en la diferencia entre precio nuevo y precio publicado.</div>
+        </div>
+        <div class="glass rounded-2xl p-6 border border-white/10">
+          <div class="text-sm text-slate-400">Artículos publicados</div>
+          <div class="text-3xl font-extrabold" id="kpiItems2">20</div>
+          <div class="mt-3 text-sm text-slate-400">Meta semanal de prueba.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-10 border-t border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="inline-grid place-items-center w-9 h-9 rounded-full bg-sky-500 text-slate-900 font-black">AV</span>
+          <span class="text-slate-400 text-sm">© <span id="year"></span> a la vuelta — prototipo académico</span>
+        </div>
+        <div class="text-sm text-slate-400">Hecho con HTML, Tailwind y JS.</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- DATA + LOGIC -->
   <script>
-    function calcularDerivada() {
-      const entrada = document.getElementById("funcion").value.trim();
-      const resultado = document.getElementById("resultado");
-      const grafico = document.getElementById("grafico");
-      resultado.innerHTML = "";
-      grafico.innerHTML = "";
+    // MENÚ MÓVIL
+    document.getElementById('menuBtn').addEventListener('click',()=>{
+      document.getElementById('mobileNav').classList.toggle('hidden');
+    });
 
-      if (!entrada) {
-        resultado.innerHTML = '<div class="paso error">⚠ Ingresa una función válida.</div>';
-        return;
-      }
+    // DATA: catálogo de ejemplo (edítalo libremente)
+    const items = [
+      {
+        titulo:"Calculadora científica Casio",
+        descripcion:"Usada, buen estado, ideal para colegio",
+        estado:"Usada, buena",
+        precio:8,
+        metodo:"venta",
+        foto:"https://images.unsplash.com/photo-1608111282453-2b95d1c1e6b3?q=80&w=1200&auto=format&fit=crop",
+        contacto:"098xxxxxxx"
+      },
+      {
+        titulo:"Libro ‘Fundamentos de Administración’",
+        descripcion:"Buen estado, busco trueque por útiles escolares",
+        estado:"Buen estado",
+        precio:null,
+        metodo:"intercambio",
+        foto:"https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop",
+        contacto:"099xxxxxxx"
+      },
+      {
+        titulo:"Cargador micro USB",
+        descripcion:"Nuevo, donación para quien lo necesite",
+        estado:"Nuevo",
+        precio:0,
+        metodo:"gratis",
+        foto:"https://images.unsplash.com/photo-1581304894492-7853551b4ae9?q=80&w=1200&auto=format&fit=crop",
+        contacto:"097xxxxxxx"
+      },
+      // Ítems adicionales de demo
+      {titulo:"Mochila escolar", descripcion:"Impermeable, poco uso", estado:"Muy buen estado", precio:6, metodo:"venta", foto:"https://images.unsplash.com/photo-1604335399105-a0c962d2ba2f?q=80&w=1200&auto=format&fit=crop", contacto:"098xxxxxxx"},
+      {titulo:"Cuadernos anillados (x3)", descripcion:"Hojas cuadriculadas", estado:"Nuevos", precio:0, metodo:"gratis", foto:"https://images.unsplash.com/photo-1473186505569-9c61870c11f9?q=80&w=1200&auto=format&fit=crop", contacto:"096xxxxxxx"},
+      {titulo:"Regla metálica 30cm", descripcion:"Sin dobleces", estado:"Usada", precio:1, metodo:"venta", foto:"https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop", contacto:"095xxxxxxx"},
+      {titulo:"Texto de Matemática I", descripcion:"Subrayado con lápiz", estado:"Buen estado", precio:0, metodo:"intercambio", foto:"https://images.unsplash.com/photo-1529148482759-b35b25c5f3f6?q=80&w=1200&auto=format&fit=crop", contacto:"095xxxxxxx"},
+      {titulo:"Cartuchera", descripcion:"Con bolsillos internos", estado:"Como nueva", precio:3, metodo:"venta", foto:"https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?q=80&w=1200&auto=format&fit=crop", contacto:"094xxxxxxx"},
+      {titulo:"Auriculares básicos", descripcion:"Funciona un lado", estado:"Para reparar", precio:1, metodo:"venta", foto:"https://images.unsplash.com/photo-1518441902113-c1d4f5a91d51?q=80&w=1200&auto=format&fit=crop", contacto:"093xxxxxxx"},
+      {titulo:"Cable HDMI", descripcion:"2 metros", estado:"Buen estado", precio:2, metodo:"venta", foto:"https://images.unsplash.com/photo-1535303311164-664fc9ec6532?q=80&w=1200&auto=format&fit=crop", contacto:"092xxxxxxx"},
+      {titulo:"Calculadora básica", descripcion:"Ideal primaria", estado:"Usada", precio:2, metodo:"venta", foto:"https://images.unsplash.com/photo-1616332739335-2bfa9ce3dc92?q=80&w=1200&auto=format&fit=crop", contacto:"098xxxxxxx"},
+      {titulo:"Estuche para laptop", descripcion:"14 pulgadas", estado:"Buen estado", precio:4, metodo:"venta", foto:"https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1200&auto=format&fit=crop", contacto:"097xxxxxxx"},
+      {titulo:"USB 16GB", descripcion:"Formateada", estado:"Buen estado", precio:3, metodo:"venta", foto:"https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1200&auto=format&fit=crop", contacto:"096xxxxxxx"},
+      {titulo:"Libro ‘Química Básica’", descripcion:"Con notas al margen", estado:"Usado", precio:0, metodo:"intercambio", foto:"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop", contacto:"095xxxxxxx"},
+      {titulo:"Corrector líquido", descripcion:"Nuevo sin abrir", estado:"Nuevo", precio:1, metodo:"venta", foto:"https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop", contacto:"095xxxxxxx"},
+      {titulo:"Lápices HB (x5)", descripcion:"Sin usar", estado:"Nuevo", precio:0, metodo:"gratis", foto:"https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=1200&auto=format&fit=crop", contacto:"094xxxxxxx"},
+      {titulo:"Compás escolar", descripcion:"Punta fina", estado:"Muy buen estado", precio:2, metodo:"venta", foto:"https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1200&auto=format&fit=crop", contacto:"093xxxxxxx"},
+      {titulo:"Forro de libros (x10)", descripcion:"Transparente", estado:"Nuevo", precio:0.5, metodo:"venta", foto:"https://images.unsplash.com/photo-1481349518771-20055b2a7b24?q=80&w=1200&auto=format&fit=crop", contacto:"092xxxxxxx"},
+      {titulo:"Regleta múltiple", descripcion:"3 tomas", estado:"Buen estado", precio:3, metodo:"venta", foto:"https://images.unsplash.com/photo-1546860172-2c63e56d0488?q=80&w=1200&auto=format&fit=crop", contacto:"091xxxxxxx"},
+      {titulo:"Bolígrafo gel (x3)", descripcion:"Azul/negro/rojo", estado:"Nuevo", precio:1, metodo:"venta", foto:"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=1200&auto=format&fit=crop", contacto:"090xxxxxxx"}
+    ];
 
-      try {
-        const fx = math.parse(entrada);
-        const fx_str = fx.toString();
+    const grid = document.getElementById('grid');
+    const search = document.getElementById('search');
+    const filterMetodo = document.getElementById('filterMetodo');
 
-        const fxh = fx.transform(node =>
-          node.isSymbolNode && node.name === "x"
-            ? math.parse("(x + h)")
-            : node
-        );
-        const fxh_str = fxh.toString();
-
-        const diferencia = math.simplify(`(${fxh_str}) - (${fx_str})`);
-        const diferencia_str = diferencia.toString();
-
-        const cociente = math.simplify(`(${diferencia_str}) / h`);
-        const cociente_str = cociente.toString();
-
-        const derivada = math.derivative(entrada, 'x');
-        const derivada_str = derivada.toString();
-
-        resultado.innerHTML += `<div class="paso">1️⃣ <strong>Fórmula general:</strong><br>f'(x) = lim₍ₕ→0₎ [f(x+h) - f(x)] / h<br><em>Explicación:</em> Esta es la definición formal de la derivada, que representa el cambio instantáneo de f(x).</div>`;
-
-        resultado.innerHTML += `<div class="paso">2️⃣ <strong>f(x) = ${fx_str}</strong><br><em>Explicación:</em> Es la función original que quieres derivar.</div>`;
-
-        resultado.innerHTML += `<div class="paso">3️⃣ <strong>f(x+h) = ${fxh_str}</strong><br><em>Explicación:</em> Reemplazamos cada 'x' por '(x+h)' en la función original, como dice la definición.</div>`;
-
-        resultado.innerHTML += `<div class="paso">4️⃣ <strong>Diferencia: f(x+h) - f(x) = ${diferencia_str}</strong><br><em>Explicación:</em> Restamos las dos funciones para calcular cuánto cambia f(x) cuando x cambia un poco (h).</div>`;
-
-        resultado.innerHTML += `<div class="paso">5️⃣ <strong>Cociente: [f(x+h) - f(x)] / h = ${cociente_str}</strong><br><em>Explicación:</em> Dividimos por h para calcular el cambio promedio, o tasa de cambio.</div>`;
-
-        resultado.innerHTML += `<div class="paso">6️⃣ <strong>Derivada (límite cuando h→0): f'(x) = ${derivada_str}</strong> ✅<br><em>Explicación:</em> Al aplicar el límite cuando h tiende a 0, obtenemos la derivada exacta: el cambio instantáneo.</div>`;
-
-        resultado.innerHTML += `<div class="analisis">
-          <h3>Análisis:</h3>
-          <p>Esta derivada representa la <strong>tasa de cambio instantánea</strong> de la función original. Es decir, cómo cambia el valor de <strong>f(x)</strong> cuando x cambia ligeramente.</p>
-          <p>La derivada puede ayudarnos a entender si la función está <strong>creciendo o decreciendo</strong>, y a encontrar <strong>máximos, mínimos o puntos críticos</strong>.</p>
-        </div>`;
-
-        const expr = math.compile(entrada);
-        const derivExpr = math.compile(derivada_str);
-
-        const xValues = math.range(-10, 10, 0.2).toArray();
-        const yValues = xValues.map(x => expr.evaluate({ x }));
-        const yDerivValues = xValues.map(x => derivExpr.evaluate({ x }));
-
-        const trace1 = {
-          x: xValues,
-          y: yValues,
-          mode: 'lines',
-          name: 'f(x)',
-          line: { width: 3, color: '#4caf50' }
-        };
-
-        const trace2 = {
-          x: xValues,
-          y: yDerivValues,
-          mode: 'lines',
-          name: "f'(x)",
-          line: { width: 3, dash: 'dot', color: '#e91e63' }
-        };
-
-        const layout = {
-          title: 'Gráfico de f(x) y su derivada f\'(x)',
-          xaxis: { title: 'x' },
-          yaxis: { title: 'y' },
-          plot_bgcolor: '#fefefe',
-          paper_bgcolor: '#fefefe',
-          font: { family: 'Inter, sans-serif' }
-        };
-
-        Plotly.newPlot('grafico', [trace1, trace2], layout);
-      } catch (e) {
-        resultado.innerHTML = `<div class="paso error">❌ Error al interpretar la función. Usa solo <strong>x</strong> como variable y asegúrate de escribir la función correctamente.</div>`;
-      }
+    function metodoBadge(m){
+      const map={venta:'bg-emerald-500 text-emerald-950', intercambio:'bg-amber-400 text-amber-950', gratis:'bg-violet-400 text-violet-950'}
+      return map[m]||'bg-slate-200 text-slate-900'
     }
+
+    function priceText(p, m){
+      if(m==='gratis') return 'Gratis/Retiro';
+      if(m==='intercambio') return 'Intercambio';
+      if(p===0 || p===null || p===undefined) return '—';
+      return `$${p}`;
+    }
+
+    function render(){
+      const q = (search.value||'').toLowerCase().trim();
+      const f = (filterMetodo.value||'').toLowerCase();
+      const list = items.filter(it=>{
+        const okMetodo = f? it.metodo===f : true;
+        const texto = `${it.titulo} ${it.descripcion} ${it.estado}`.toLowerCase();
+        const okTexto = q? texto.includes(q) : true;
+        return okMetodo && okTexto;
+      });
+      grid.innerHTML = list.map((it,idx)=>`
+        <article class="glass rounded-2xl overflow-hidden border border-white/10 hover:border-white/20 transition">
+          <div class="aspect-[4/3] overflow-hidden">
+            <img src="${it.foto}" alt="${it.titulo}" class="w-full h-full object-cover" loading="lazy"/>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center justify-between gap-3">
+              <h3 class="font-semibold leading-tight">${it.titulo}</h3>
+              <span class="text-xs px-2 py-1 rounded-full ${metodoBadge(it.metodo)} capitalize">${it.metodo}</span>
+            </div>
+            <p class="text-sm text-slate-300 mt-1">${it.descripcion}</p>
+            <div class="mt-3 flex items-center justify-between">
+              <span class="font-bold">${priceText(it.precio, it.metodo)}</span>
+              <button class="text-sm px-3 py-1.5 rounded-xl border border-white/10 hover:border-white/30" onclick="verFicha(${idx})">Ver ficha</button>
+            </div>
+          </div>
+        </article>
+      `).join('');
+
+      // KPIs dinámicos (en base al listado actual)
+      document.getElementById('kpiItems').textContent = list.length;
+      document.getElementById('kpiItems2').textContent = list.length;
+    }
+
+    search.addEventListener('input', render);
+    filterMetodo.addEventListener('change', render);
+
+    // Modal simple para ver ficha
+    const modal = document.createElement('div');
+    modal.id = 'modal';
+    modal.className = 'fixed inset-0 hidden items-center justify-center bg-black/60 p-4';
+    modal.innerHTML = `
+      <div class='glass max-w-xl w-full rounded-2xl border border-white/10 overflow-hidden'>
+        <div class='flex items-center justify-between p-4 border-b border-white/10'>
+          <h4 id='modalTitle' class='font-semibold'>Ficha</h4>
+          <button class='p-2 hover:bg-white/10 rounded-xl' onclick='cerrarModal()' aria-label='Cerrar'>×</button>
+        </div>
+        <div class='p-4 grid sm:grid-cols-2 gap-4'>
+          <img id='modalImg' class='w-full h-48 object-cover rounded-xl' alt='Imagen artículo'/>
+          <div>
+            <p id='modalDesc' class='text-slate-300'></p>
+            <p class='mt-2 text-sm text-slate-400'>Estado: <span id='modalEstado'></span></p>
+            <p class='mt-1 text-sm text-slate-400'>Método: <span id='modalMetodo' class='capitalize'></span></p>
+            <p class='mt-1 text-sm text-slate-400'>Precio: <span id='modalPrecio'></span></p>
+            <p class='mt-3 text-sm'>Contacto: <span id='modalContacto' class='font-semibold'></span></p>
+          </div>
+        </div>
+        <div class='p-4 border-t border-white/10 flex items-center justify-end gap-3'>
+          <a href='#registro' class='px-4 py-2 rounded-xl bg-sky-500 text-slate-900 font-semibold hover:bg-sky-400'>Me interesa</a>
+          <button class='px-4 py-2 rounded-xl border border-white/10 hover:border-white/30' onclick='cerrarModal()'>Cerrar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+
+    window.verFicha = (idx)=>{
+      const it = items[idx];
+      document.getElementById('modalTitle').textContent = it.titulo;
+      document.getElementById('modalImg').src = it.foto;
+      document.getElementById('modalImg').alt = it.titulo;
+      document.getElementById('modalDesc').textContent = it.descripcion;
+      document.getElementById('modalEstado').textContent = it.estado;
+      document.getElementById('modalMetodo').textContent = it.metodo;
+      document.getElementById('modalPrecio').textContent = priceText(it.precio, it.metodo);
+      document.getElementById('modalContacto').textContent = it.contacto;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    window.cerrarModal = ()=>{
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Inicialización
+    render();
+    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
